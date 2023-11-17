@@ -1,0 +1,5 @@
+multipath-tools multipath-tools-boot
+libblockdev-crypto2 libblockdev-mdraid2
+zfs-dkms zfsutils-linux
+sanoid
+samba

@@ -3,18 +3,20 @@
 # Some settings may impact device functionality. See link above for details
 
 # Uncomment some or all of these to enable the optional hardware interfaces
-#dtparam=i2c_arm=on
-#dtparam=i2s=on
-#dtparam=spi=on
+dtparam=i2c_arm=on
+dtparam=i2s=off
+dtparam=spi=off
+dtoverlay=disable-bt
+#dtoverlay=i2c-rtc,ds1307
 
 # Enable audio (loads snd_bcm2835)
-dtparam=audio=on
+dtparam=audio=off
 
 # Additional overlays and parameters are documented
 # /boot/firmware/overlays/README
 
 # Automatically load overlays for detected cameras
-camera_auto_detect=1
+camera_auto_detect=0
 
 # Automatically load overlays for detected DSI displays
 display_auto_detect=1
@@ -39,11 +41,11 @@ disable_overscan=1
 # Run as fast as firmware / board allows
 arm_boost=1
 
-[cm4]
+#[cm4]
 # Enable host mode on the 2711 built-in XHCI USB controller.
 # This line should be removed if the legacy DWC2 controller is required
 # (e.g. for USB device mode) or if USB support is not required.
-otg_mode=1
+#otg_mode=1
 
 [all]
-
+usb_max_current_enable=1
