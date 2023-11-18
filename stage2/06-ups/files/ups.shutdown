@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ $1 = "poweroff" ] || [ $1 = "halt" ]; then
+    BUTTON=425
+
+    echo "$BUTTON" > /sys/class/gpio/export;
+    echo "out" > /sys/class/gpio/gpio$BUTTON/direction
+    echo "1" > /sys/class/gpio/gpio$BUTTON/value
+
+    /usr/bin/sleep 10
+fi
