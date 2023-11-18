@@ -5,3 +5,4 @@ if ! grep -q "^i2c[-_]dev" "${ROOTFS_DIR}/etc/modules"; then
 fi
 
 install -v -m 755 files/ups.shutdown "${ROOTFS_DIR}/lib/systemd/system-shutdown/"
+install -v -m 755 files/ups.service "${ROOTFS_DIR}/lib/systemd/system/"
