@@ -15,5 +15,5 @@ install -v -m 644 files/input_button.py "${ROOTFS_DIR}/usr/share/monolith/ups/"
 install -v -m 644 files/power_monitor.py "${ROOTFS_DIR}/usr/share/monolith/ups/"
 
 on_chroot << EOF
-systemctl enable ups.service
+#systemctl enable ups.service
 EOF
