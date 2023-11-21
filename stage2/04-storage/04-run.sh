@@ -6,5 +6,4 @@ install -v -m 600 files/multipath.conf "${ROOTFS_DIR}/etc/multipath/conf.d/"
 install -v -d "${ROOTFS_DIR}/usr/lib/aarch64-linux-gnu/udisks2/modules"
 install -v -m 600 files/empty "${ROOTFS_DIR}/usr/lib/aarch64-linux-gnu/udisks2/modules/"
 
-install -v -d "${ROOTFS_DIR}/var/lib/samba/usershares-workaround"
-inttall -v -m 644 files/smb.conf "${ROOTFS_DIR}/etc/samba/"
+install -v -m 644 files/smb.conf "${ROOTFS_DIR}/etc/samba/"
