@@ -18,6 +18,14 @@ dosfstools libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
 qemu-utils kpartx gpg pigz
 ```
 
+```bash
+wget https://ftp-master.debian.org/keys/archive-key-12.asc
+wget https://ftp-master.debian.org/keys/archive-key-12-security.asc
+mkdir -p /usr/share/keyrings/
+gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-12.asc
+gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-12-security.asc
+```
+
 The file `depends` contains a list of tools needed.  The format of this
 package is `<tool>[:<debian-package>]`.
 
