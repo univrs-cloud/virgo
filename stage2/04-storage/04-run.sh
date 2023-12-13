@@ -7,9 +7,3 @@ install -v -d "${ROOTFS_DIR}/usr/lib/aarch64-linux-gnu/udisks2/modules"
 install -v -m 600 files/empty "${ROOTFS_DIR}/usr/lib/aarch64-linux-gnu/udisks2/modules/"
 
 install -v -m 644 files/smb.conf "${ROOTFS_DIR}/etc/samba/"
-
-on_chroot << EOF
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-source /root/.bashrc
-nvm install --lts
-EOF
