@@ -2,7 +2,7 @@
 
 if [ $1 = "poweroff" ] || [ $1 = "halt" ]; then
     BUTTON=26
-    if grep -aq "Pi 5" /proc/device-tree/model
+    if grep -aq "Pi 5" /proc/device-tree/model; then
         BUTTON=425 # 399 + 26 (button 26)
     fi
     
