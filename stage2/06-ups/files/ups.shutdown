@@ -1,14 +1,23 @@
 #!/bin/sh
 
 if [ $1 = "poweroff" ] || [ $1 = "halt" ]; then
-    BUTTON=26
+    BUTTON=0
+
+    if grep -aq "Pi 4" /proc/device-tree/model; then
+        BUTTON=26 # (button 26)
+    fi
+
     if grep -aq "Pi 5" /proc/device-tree/model; then
         BUTTON=425 # 399 + 26 (button 26)
     fi
-    
+
+    if [ "$BUTTON" -eq 0 ]; then
+        exit
+    fi
+
     echo "$BUTTON" > /sys/class/gpio/export;
     echo "out" > /sys/class/gpio/gpio$BUTTON/direction
     echo "1" > /sys/class/gpio/gpio$BUTTON/value
-    
+
     /usr/bin/sleep 10
 fi
