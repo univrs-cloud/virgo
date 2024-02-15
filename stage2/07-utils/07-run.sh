@@ -4,12 +4,8 @@ install -v -m 644 files/virgo-api_1.0.0_all.deb "${ROOTFS_DIR}/tmp/virgo-api_1.0
 install -v -m 644 files/virgo-ui_1.0.0_all.deb "${ROOTFS_DIR}/tmp/virgo-ui_1.0.0_all.deb"
 
 on_chroot << EOF
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-source /root/.bashrc
-nvm install --lts
-
-sudo ln -s /root/.nvm/versions/node/v20.11.1/bin/node /usr/bin/node
-sudo ln -s /root/.nvm/versions/node/v20.11.1/bin/npm /usr/bin/npm
+curl -fsSL https://raw.githubusercontent.com/tj/n/master/bin/n | bash -s lts
+npm install -g n
 
 dpkg -i /tmp/virgo-api_1.0.0_all.deb
 dpkg -i /tmp/virgo-ui_1.0.0_all.deb
