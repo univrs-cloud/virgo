@@ -88,6 +88,11 @@ class SystemPower:
         self.has_read_errors = has_errors
 
     def set_primary_power_source(self, primary_power_source, log_change=False):
+        if self.primary_power_source and self.primary_power_source != primary_power_source:
+            f = open("/tmp/ups_power_source", "w")
+            f.write(str(primary_power_source))
+            f.close()
+
         if log_change and self.primary_power_source and self.primary_power_source != primary_power_source:
             logging.info(f"Primary power source switched from {self.primary_power_source} to {primary_power_source}")
 
@@ -129,6 +134,9 @@ class SystemPower:
             self.power_source_button.stop()
 
     def monitor_forever(self, max_interval=60):
+        f = open("/tmp/ups_power_source", "w")
+        f.write(str(self.primary_power_source))
+        f.close()
         now = datetime.utcnow()
         self.running = True
         while self.running:
