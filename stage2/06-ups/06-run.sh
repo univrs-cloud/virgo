@@ -7,5 +7,5 @@ fi
 install -v -m 644 files/virgo-ups_1.0.0_all.deb "${ROOTFS_DIR}/tmp/virgo-ups_1.0.0_all.deb"
 
 on_chroot << EOF
-dpkg -i /tmp/virgo-usp_1.0.0_all.deb
+dpkg -i /tmp/virgo-ups_1.0.0_all.deb
 EOF
