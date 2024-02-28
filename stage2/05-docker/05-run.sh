@@ -21,4 +21,5 @@ check_internet
 curl -sSL https://get.docker.com | sh || error "Failed to install Docker."
 usermod -aG docker $FIRST_USER_NAME || error "Failed to add user to the Docker usergroup."
 systemctl enable docker
+# docker network create --driver=bridge --subnet=172.30.0.0/16 --gateway=172.30.0.1 virgo
 EOF
