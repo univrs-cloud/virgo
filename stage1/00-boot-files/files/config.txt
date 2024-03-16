@@ -43,11 +43,10 @@ disable_overscan=1
 # Run as fast as firmware / board allows
 arm_boost=1
 
-#[cm4]
-# Enable host mode on the 2711 built-in XHCI USB controller.
-# This line should be removed if the legacy DWC2 controller is required
-# (e.g. for USB device mode) or if USB support is not required.
-#otg_mode=1
+# Overclock
+over_voltage_delta=50000
+[board-type=0x17] # Pi5 only
+arm_freq=2800 # default 2400
 
 [all]
 usb_max_current_enable=1
