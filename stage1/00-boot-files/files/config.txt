@@ -40,9 +40,6 @@ arm_64bit=1
 # Disable compensation for displays with overscan
 disable_overscan=1
 
-# Run as fast as firmware / board allows
-arm_boost=1
-
 # Overclock
 over_voltage_delta=50000
 [board-type=0x11] # pi4
