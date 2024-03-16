@@ -45,7 +45,9 @@ arm_boost=1
 
 # Overclock
 over_voltage_delta=50000
-[board-type=0x17] # Pi5 only
+[board-type=0x11] # pi4
+arm_freq=2000 # default 1500
+[board-type=0x17] # pi5
 arm_freq=2800 # default 2400
 
 [all]
