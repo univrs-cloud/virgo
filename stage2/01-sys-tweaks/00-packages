@@ -17,6 +17,7 @@ dosfstools
 dphys-swapfile
 raspberrypi-sys-mods
 pi-bluetooth
+apt-show-versions
 apt-listchanges
 usb-modeswitch
 libpam-chksshpwd
