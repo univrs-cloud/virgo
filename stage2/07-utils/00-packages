@@ -2,3 +2,5 @@ git
 mc
 hdparm
 sqlite3
+virgo-api
+virgo-ui

@@ -1,0 +1,1 @@
+deb [signed-by=/etc/apt/trusted.gpg.d/virgo-packages.gpg] https://univrs-cloud.github.io/virgo-packages ./

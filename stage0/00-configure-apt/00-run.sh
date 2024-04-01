@@ -5,6 +5,8 @@ install -m 644 files/raspi.list "${ROOTFS_DIR}/etc/apt/sources.list.d/"
 sed -i "s/RELEASE/${RELEASE}/g" "${ROOTFS_DIR}/etc/apt/sources.list"
 sed -i "s/RELEASE/${RELEASE}/g" "${ROOTFS_DIR}/etc/apt/sources.list.d/raspi.list"
 
+install -m 644 files/virgo.list "${ROOTFS_DIR}/etc/apt/sources.list.d/"
+
 install -m 644 files/bookworm-backports.list "${ROOTFS_DIR}/etc/apt/sources.list.d/"
 install -v -d "${ROOTFS_DIR}/etc/apt/preferences.d"
 install -v -m 644 files/90_zfs "${ROOTFS_DIR}/etc/apt/preferences.d/"
@@ -18,6 +20,10 @@ fi
 
 cat files/raspberrypi.gpg.key | gpg --dearmor > "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg"
 install -m 644 "${STAGE_WORK_DIR}/raspberrypi-archive-stable.gpg" "${ROOTFS_DIR}/etc/apt/trusted.gpg.d/"
+
+cat files/virgo-packages.gpg.key | gpg --dearmor > "${STAGE_WORK_DIR}/virgo-packages.gpg"
+install -m 644 "${STAGE_WORK_DIR}/virgo-packages.gpg" "${ROOTFS_DIR}/etc/apt/trusted.gpg.d/"
+
 on_chroot <<- \EOF
 	ARCH="$(dpkg --print-architecture)"
 	if [ "$ARCH" = "armhf" ]; then
