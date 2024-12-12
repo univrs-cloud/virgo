@@ -74,6 +74,6 @@ EOF
 sed -i 's/^#?Storage=.*/Storage=volatile/' "${ROOTFS_DIR}/etc/systemd/journald.conf"
 
 if [ -e "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf" ]; then
-  sed -i 's/^#?use-ipv6=.*/use-ipv6=no/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
-  sed -i 's/^#?publish-workstation=.*/publish-workstation=yes/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
+  sed -i 's/^#\?use-ipv6=.*/use-ipv6=no/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
+  sed -i 's/^#\?publish-workstation=.*/publish-workstation=yes/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
 fi
