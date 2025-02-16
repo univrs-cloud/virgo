@@ -7,7 +7,7 @@ dtparam=i2c_arm=on
 dtparam=i2s=off
 dtparam=spi=off
 dtparam=pciex1
-dtparam=pciex1_gen=3
+dtparam=pciex1_gen=2
 dtoverlay=disable-wifi
 dtoverlay=disable-bt
 #dtoverlay=i2c-rtc,ds1307
