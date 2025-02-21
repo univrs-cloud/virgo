@@ -49,4 +49,4 @@ arm_freq=2000 # default 1500
 arm_freq=2800 # default 2400
 
 [all]
-usb_max_current_enable=1
+
