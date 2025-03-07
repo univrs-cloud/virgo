@@ -2,6 +2,6 @@ git
 mc
 hdparm
 sqlite3
-msmtp bsd-mailx
+msmtp-mta bsd-mailx
 virgo-api
 virgo-ui
