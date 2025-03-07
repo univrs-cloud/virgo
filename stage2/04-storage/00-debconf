@@ -1,2 +1,2 @@
 zfs-dkms zfs-dkms/note-incompatible-licenses note true
-msmtp msmtp/apparmor false
+msmtp msmtp/apparmor boolean false
