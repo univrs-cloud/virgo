@@ -1,1 +1,1 @@
-
+msmtp msmtp/apparmor boolean false
