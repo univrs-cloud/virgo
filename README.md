@@ -1,4 +1,4 @@
-# virgoOS
+# virgo
 
 Tool used to create virgoOS images, and custom images based on Raspberry Pi OS,
 which was in turn derived from the Raspbian project.
@@ -11,13 +11,13 @@ Raspberry Pi OS 64 bit images are based primarily on Debian.
 
 ## Dependencies
 
-pi-gen runs on Debian-based operating systems released after 2017, and we
+virgo runs on Debian-based operating systems released after 2017, and we
 always advise you use the latest OS for security reasons.
 
 On other Linux distributions it may be possible to use the Docker build described
 below.
 
-To install the required dependencies for `pi-gen` you should run:
+To install the required dependencies for `virgo` you should run:
 
 ```bash
 apt-get install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
@@ -49,7 +49,7 @@ git clone https://github.com/univrs-cloud/virgo.git
 the latest revision of the repository. Do not do this on your development machine.
 
 Also, be careful to clone the repository to a base path **NOT** containing spaces.
-This configuration is not supported by debootstrap and will lead to `pi-gen` not
+This configuration is not supported by debootstrap and will lead to `virgo` not
 running.
 
 After cloning the repository, you can move to the next step and start configuring
@@ -98,12 +98,12 @@ The following environment variables are supported:
 
    **CAUTION**: Currently, changing this value will probably break build.sh
 
-   Top-level directory for `pi-gen`.  Contains stage directories, build
+   Top-level directory for `virgo`.  Contains stage directories, build
    scripts, and by default both work and deployment directories.
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work`)
 
-   Directory in which `pi-gen` builds the target system.  This value can be
+   Directory in which `virgo` builds the target system.  This value can be
    changed if you have a suitably large, fast storage location for stages to
    be built and cached.  Note, `WORK_DIR` stores a complete copy of the target
    system for each build stage, amounting to tens of gigabytes in the case of
@@ -213,18 +213,18 @@ The following environment variables are supported:
 
  * `SETFCAP` (Default: unset)
 
-   * Setting to `1` will prevent pi-gen from dropping the "capabilities"
+   * Setting to `1` will prevent virgo from dropping the "capabilities"
    feature. Generating the root filesystem with capabilities enabled and running
    it from a filesystem that does not support capabilities (like NFS) can cause
    issues. Only enable this if you understand what it is.
 
  * `STAGE_LIST` (Default: `stage*`)
 
-    If set, then instead of working through the numeric stages in order, this list will be followed. For example setting to `"stage0 stage1 mystage stage2"` will run the contents of `mystage` before stage2. Note that quotes are needed around the list. An absolute or relative path can be given for stages outside the pi-gen directory.
+    If set, then instead of working through the numeric stages in order, this list will be followed. For example setting to `"stage0 stage1 mystage stage2"` will run the contents of `mystage` before stage2. Note that quotes are needed around the list. An absolute or relative path can be given for stages outside the virgo directory.
 
  * `EXPORT_CONFIG_DIR` (Default: `$BASE_DIR/export-image`)
 
-    If set, use this directory path as the location of scripts to run when generating images. An absolute or relative path can be given for a location outside the pi-gen directory.
+    If set, use this directory path as the location of scripts to run when generating images. An absolute or relative path can be given for a location outside the virgo directory.
 
 A simple example for building Raspberry Pi OS:
 
@@ -300,7 +300,7 @@ vi config         # Edit your config file. See above.
 ```
 
 If everything goes well, your finished image will be in the `deploy/` folder.
-You can then remove the build container with `docker rm -v pigen_work`
+You can then remove the build container with `docker rm -v virgo_work`
 
 If you encounter errors during the build, you can edit the corresponding scripts, and
 continue:
@@ -312,7 +312,7 @@ CONTINUE=1 ./build-docker.sh
 To examine the container after a failure you can enter a shell within it using:
 
 ```bash
-sudo docker run -it --privileged --volumes-from=pigen_work pi-gen /bin/bash
+sudo docker run -it --privileged --volumes-from=virgo_work virgo /bin/bash
 ```
 
 After successful build, the build container is by default removed. This may be undesired when making incremental changes to a customized build. To prevent the build script from remove the container add
@@ -425,7 +425,7 @@ A 64 bit image can be generated from the `arm64` branch in this repository. Just
 replace the command from [this section](#getting-started-with-building-your-images)
 by the one below, and follow the rest of the documentation:
 ```bash
-git clone --branch arm64 https://github.com/RPI-Distro/pi-gen.git
+git clone --branch arm64 https://github.com/univrs-cloud/virgo.git
 ```
 
 If you want to generate a 64 bits image from a Raspberry Pi running a 32 bits
@@ -438,7 +438,7 @@ work from a Raspberry Pi with a 64-bit capable processor (i.e. Raspberry Pi Zero
 ## `binfmt_misc`
 
 Linux is able to execute binaries from other architectures, meaning that it should be
-possible to make use of `pi-gen` on an x86_64 system, even though it will be running
+possible to make use of `virgo` on an x86_64 system, even though it will be running
 ARM binaries. This requires support from the [`binfmt_misc`](https://en.wikipedia.org/wiki/Binfmt_misc)
 kernel module.
 
@@ -448,7 +448,7 @@ You may see one of the following errors:
 update-binfmts: warning: Couldn't load the binfmt_misc module.
 ```
 ```
-W: Failure trying to run: chroot "/pi-gen/work/test/stage0/rootfs" /bin/true
+W: Failure trying to run: chroot "/virgo/work/test/stage0/rootfs" /bin/true
 and/or
 chroot: failed to run command '/bin/true': Exec format error
 ```
