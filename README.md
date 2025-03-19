@@ -1,6 +1,6 @@
-# pi-gen
+# virgoOS
 
-Tool used to create Raspberry Pi OS images, and custom images based on Raspberry Pi OS,
+Tool used to create virgoOS images, and custom images based on Raspberry Pi OS,
 which was in turn derived from the Raspbian project.
 
 **Note**: Raspberry Pi OS 32 bit images are based primarily on Raspbian, while
