@@ -1,3 +1,5 @@
+ARCH="arm64"
+RELEASE="bookworm"
 IMG_NAME="${Spica-$RELEASE-$ARCH}"
 PI_GEN="univrs.cloud"
 PI_GEN_REPO="https://univrs.cloud"
