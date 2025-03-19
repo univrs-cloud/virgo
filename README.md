@@ -42,7 +42,7 @@ Getting started is as simple as cloning this repository on your build machine. Y
 can do so with:
 
 ```bash
-git clone https://github.com/RPI-Distro/pi-gen.git
+git clone https://github.com/univrs-cloud/virgo.git
 ```
 
 `--depth 1` can be added after `git clone` to create a shallow clone, only containing
@@ -63,13 +63,13 @@ environment variables.
 
 The following environment variables are supported:
 
- * `IMG_NAME` (Default: `raspios-$RELEASE-$ARCH`, for example: `raspios-bookworm-armhf`)
+ * `IMG_NAME` (Default: `spica-$RELEASE-$ARCH`, for example: `spica-bookworm-armhf`)
 
    The name of the image to build with the current stage directories. Use this
    variable to set the root name of your OS, eg `IMG_NAME=Frobulator`.
    Export files in stages may add suffixes to `IMG_NAME`.
 
- * `PI_GEN_RELEASE` (Default: `Raspberry Pi reference`)
+ * `PI_GEN_RELEASE` (Default: `virgoOS Spica`)
 
    The release name to use in `/etc/issue.txt`. The default should only be used
    for official Raspberry Pi builds.
@@ -143,15 +143,15 @@ The following environment variables are supported:
    Setting to '1' enables the QEMU mode - creating an image that can be mounted via QEMU for an emulated
    environment. These images include "-qemu" in the image file name.
 
- * `LOCALE_DEFAULT` (Default: 'en_GB.UTF-8' )
+ * `LOCALE_DEFAULT` (Default: 'en_US.UTF-8' )
 
    Default system locale.
 
- * `TARGET_HOSTNAME` (Default: 'raspberrypi' )
+ * `TARGET_HOSTNAME` (Default: 'm87' )
 
    Setting the hostname to the specified value.
 
- * `KEYBOARD_KEYMAP` (Default: 'gb' )
+ * `KEYBOARD_KEYMAP` (Default: 'us' )
 
    Default keyboard keymap.
 
@@ -159,7 +159,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/xkb-keymap` value.
 
- * `KEYBOARD_LAYOUT` (Default: 'English (UK)' )
+ * `KEYBOARD_LAYOUT` (Default: 'English (US)' )
 
    Default keyboard layout.
 
@@ -167,25 +167,25 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/variant` value.
 
- * `TIMEZONE_DEFAULT` (Default: 'Europe/London' )
+ * `TIMEZONE_DEFAULT` (Default: 'Europe/Bucharest' )
 
    Default time zone.
 
    To get the current value from a running system, look in
    `/etc/timezone`.
 
- * `FIRST_USER_NAME` (Default: `pi`)
+ * `FIRST_USER_NAME` (Default: `voyager`)
 
    Username for the first user. This user only exists during the image creation process. Unless
    `DISABLE_FIRST_BOOT_USER_RENAME` is set to `1`, this user will be renamed on the first boot with
    a name chosen by the final user. This security feature is designed to prevent shipping images
    with a default username and help prevent malicious actors from taking over your devices.
 
- * `FIRST_USER_PASS` (Default: unset)
+ * `FIRST_USER_PASS` (Default: `intergalactic`)
 
    Password for the first user. If unset, the account is locked.
 
- * `DISABLE_FIRST_BOOT_USER_RENAME` (Default: `0`)
+ * `DISABLE_FIRST_BOOT_USER_RENAME` (Default: `1`)
 
    Disable the renaming of the first user during the first boot. This make it so `FIRST_USER_NAME`
    stays activated. `FIRST_USER_PASS` must be set for this to work. Please be aware of the implied
@@ -195,7 +195,7 @@ The following environment variables are supported:
 
    Sets the default WLAN regulatory domain and unblocks WLAN interfaces. This should be a 2-letter ISO/IEC 3166 country Code, i.e. `GB`
 
- * `ENABLE_SSH` (Default: `0`)
+ * `ENABLE_SSH` (Default: `1`)
 
    Setting to `1` will enable ssh server for remote log in. Note that if you are using a common password such as the defaults there is a high risk of attackers taking over you Raspberry Pi.
 
@@ -229,7 +229,7 @@ The following environment variables are supported:
 A simple example for building Raspberry Pi OS:
 
 ```bash
-IMG_NAME='raspios'
+IMG_NAME='Spica'
 ```
 
 The config file can also be specified on the command line as an argument the `build.sh` or `build-docker.sh` scripts.
