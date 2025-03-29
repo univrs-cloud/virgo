@@ -9,3 +9,9 @@ install -v -m 600 files/empty "${ROOTFS_DIR}/usr/lib/aarch64-linux-gnu/udisks2/m
 install -v -m 644 files/zfs.conf "${ROOTFS_DIR}/etc/modprobe.d/"
 
 install -v -m 644 files/smb.conf "${ROOTFS_DIR}/etc/samba/"
+
+on_chroot << EOF
+if [ -n "${FIRST_USER_PASS}" ]; then
+  samba-tool user password "${FIRST_USER_NAME}" "${FIRST_USER_PASS}"
+fi
+EOF
