@@ -12,6 +12,6 @@ install -v -m 644 files/smb.conf "${ROOTFS_DIR}/etc/samba/"
 
 on_chroot << EOF
 if [ -n "${FIRST_USER_PASS}" ]; then
-  samba-tool user password "${FIRST_USER_NAME}" "${FIRST_USER_PASS}"
+  smbpasswd "${FIRST_USER_NAME}" <<< "${FIRST_USER_PASS}\n${FIRST_USER_PASS}"
 fi
 EOF
