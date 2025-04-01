@@ -3,5 +3,6 @@ mc
 hdparm
 sqlite3
 msmtp-mta bsd-mailx
+redis-server
 virgo-api
 virgo-ui
