@@ -2,3 +2,4 @@ wpasupplicant wireless-tools firmware-atheros firmware-brcm80211 firmware-libert
 raspberrypi-net-mods
 network-manager
 net-tools
+fail2ban
