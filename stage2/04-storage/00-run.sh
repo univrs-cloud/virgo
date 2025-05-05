@@ -10,6 +10,8 @@ install -v -m 644 files/zfs.conf "${ROOTFS_DIR}/etc/modprobe.d/"
 
 install -v -m 644 files/smb.conf "${ROOTFS_DIR}/etc/samba/"
 
+install -v -m 644 files/sanoid.conf "${ROOTFS_DIR}/etc/sanoid/"
+
 on_chroot << EOF
 if [ -n "${FIRST_USER_PASS}" ]; then
   echo -e "${FIRST_USER_PASS}\n${FIRST_USER_PASS}" | smbpasswd -a -s "${FIRST_USER_NAME}"
