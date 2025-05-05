@@ -10,6 +10,7 @@ install -v -m 644 files/zfs.conf "${ROOTFS_DIR}/etc/modprobe.d/"
 
 install -v -m 644 files/smb.conf "${ROOTFS_DIR}/etc/samba/"
 
+install -v -d "${ROOTFS_DIR}/etc/sanoid"
 install -v -m 644 files/sanoid.conf "${ROOTFS_DIR}/etc/sanoid/"
 
 on_chroot << EOF
