@@ -15,7 +15,7 @@ To install the required dependencies for `virgo` you should run:
 ```bash
 apt-get install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
 dosfstools libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
-gpg pigz xxd arch-test
+gpg pigz xxd arch-test bmap-tools
 ```
 
 ```bash
@@ -81,11 +81,12 @@ The following environment variables are supported:
    will not be included in the image, making it safe to use an `apt-cacher` or
    similar package for development.
 
-   If you have Docker installed, you can set up a local apt caching proxy to
-   like speed up subsequent builds like this:
+ * `TEMP_REPO` (Default: unset)
 
-       docker-compose up -d
-       echo 'APT_PROXY=http://172.17.0.1:3142' >> config
+   An additional temporary apt repo to be used during the build process. This
+   could be useful if you require pre-release software to be included in the
+   image. The variable should contain sources in [one-line-style format](https://manpages.debian.org/stable/apt/sources.list.5.en.html#ONE-LINE-STYLE_FORMAT).
+   "RELEASE" will be replaced with the RELEASE variable.
 
  * `BASE_DIR`  (Default: location of `build.sh`)
 
