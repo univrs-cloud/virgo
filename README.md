@@ -17,7 +17,7 @@ To install the required dependencies for `virgo` you should run:
 
 ```bash
 apt-get install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
-dosfstools libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
+dosfstools e2fsprogs libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
 gpg pigz xxd arch-test bmap-tools
 ```
 
