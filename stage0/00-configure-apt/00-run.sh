@@ -8,7 +8,7 @@ sed -i "s/RELEASE/${RELEASE}/g" "${ROOTFS_DIR}/etc/apt/sources.list.d/raspi.sour
 
 install -m 644 files/virgo.list "${ROOTFS_DIR}/etc/apt/sources.list.d/"
 
-install -m 644 files/bookworm-backports.list "${ROOTFS_DIR}/etc/apt/sources.list.d/"
+install -m 644 files/trixie-backports.list "${ROOTFS_DIR}/etc/apt/sources.list.d/"
 install -v -d "${ROOTFS_DIR}/etc/apt/preferences.d"
 install -v -m 644 files/90_zfs "${ROOTFS_DIR}/etc/apt/preferences.d/"
 

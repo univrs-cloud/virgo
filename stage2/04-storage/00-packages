@@ -1,5 +1,5 @@
 multipath-tools multipath-tools-boot
-libblockdev-mdraid2
+libblockdev-mdraid3
 zfs-dkms zfsutils-linux
 sanoid
 samba
