@@ -5,14 +5,17 @@ INFO_FILE="${STAGE_WORK_DIR}/${IMG_FILENAME}${IMG_SUFFIX}.info"
 SBOM_FILE="${STAGE_WORK_DIR}/${IMG_FILENAME}${IMG_SUFFIX}.sbom"
 BMAP_FILE="${STAGE_WORK_DIR}/${IMG_FILENAME}${IMG_SUFFIX}.bmap"
 
-on_chroot << EOF
-update-initramfs -k all -c
-if [ -x /etc/init.d/fake-hwclock ]; then
-	/etc/init.d/fake-hwclock stop
-fi
-if hash hardlink 2>/dev/null; then
-	hardlink -t /usr/share/doc
-fi
+on_chroot <<- EOF
+	update-initramfs -k all -c
+	if hash hardlink 2>/dev/null; then
+		hardlink -t /usr/share/doc
+	fi
+	if [ -f /usr/lib/systemd/system/apt-listchanges.service ]; then
+		python3 -m apt_listchanges.populate_database --profile apt
+		systemctl disable apt-listchanges.timer
+	fi
+	install -m 755 -o systemd-timesync -g systemd-timesync -d /var/lib/systemd/timesync/clock
+	install -m 644 -o systemd-timesync -g systemd-timesync /dev/null /var/lib/systemd/timesync/clock
 EOF
 
 if [ -f "${ROOTFS_DIR}/etc/initramfs-tools/update-initramfs.conf" ]; then
@@ -51,7 +54,7 @@ rm -f "${ROOTFS_DIR}"/usr/share/icons/*/icon-theme.cache
 
 rm -f "${ROOTFS_DIR}/var/lib/dbus/machine-id"
 
-true > "${ROOTFS_DIR}/etc/machine-id"
+echo "uninitialized" > "${ROOTFS_DIR}/etc/machine-id"
 
 ln -nsf /proc/mounts "${ROOTFS_DIR}/etc/mtab"
 

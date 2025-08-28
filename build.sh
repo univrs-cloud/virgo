@@ -176,7 +176,7 @@ export PI_GEN_REPO=${PI_GEN_REPO:-https://univrs.cloud}
 export PI_GEN_RELEASE=${PI_GEN_RELEASE:-virgoOS Spica}
 
 export ARCH=arm64
-export RELEASE=${RELEASE:-bookworm} # Don't forget to update stage0/prerun.sh
+export RELEASE=${RELEASE:-trixie} # Don't forget to update stage0/prerun.sh
 export IMG_NAME="${IMG_NAME:-spica-$RELEASE-$ARCH}"
 
 export USE_QEMU="${USE_QEMU:-0}"

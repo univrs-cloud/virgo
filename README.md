@@ -59,7 +59,7 @@ environment variables.
 
 The following environment variables are supported:
 
- * `IMG_NAME` (Default: `spica-$RELEASE-$ARCH`, for example: `spica-bookworm-armhf`)
+ * `IMG_NAME` (Default: `spica-$RELEASE-$ARCH`, for example: `spica-trixie-armhf`)
 
    The name of the image to build with the current stage directories. Use this
    variable to set the root name of your OS, eg `IMG_NAME=Frobulator`.
@@ -70,7 +70,7 @@ The following environment variables are supported:
    The release name to use in `/etc/issue.txt`. The default should only be used
    for official Raspberry Pi builds.
 
-* `RELEASE` (Default: `bookworm`)
+* `RELEASE` (Default: `trixie`)
 
    The release version to build images against. Valid values are any supported
    Debian release. However, since different releases will have different sets of
