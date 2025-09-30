@@ -16,9 +16,9 @@ below.
 To install the required dependencies for `virgo` you should run:
 
 ```bash
-apt-get install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
+apt install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
 dosfstools e2fsprogs libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
-gpg pigz xxd arch-test bmap-tools
+gpg pigz xxd arch-test bmap-tools kmod
 ```
 
 ```bash
@@ -222,6 +222,10 @@ The following environment variables are supported:
  * `EXPORT_CONFIG_DIR` (Default: `$BASE_DIR/export-image`)
 
     If set, use this directory path as the location of scripts to run when generating images. An absolute or relative path can be given for a location outside the virgo directory.
+
+ * `ENABLE_CLOUD_INIT` (Default: `1`)
+
+    If set to `1`, cloud-init and netplan will be installed and configured. This will allow you to configure your Raspberry Pi using cloud-init configuration files. The cloud-init configuration files should be placed in the bootfs or by editing the files in `stage2/04-cloud-init/files`. Cloud-init will be configured to read them on first boot.
 
 A simple example for building Raspberry Pi OS:
 
