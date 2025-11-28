@@ -59,7 +59,7 @@ DEBIAN_FRONTEND=noninteractive dpkg-reconfigure keyboard-configuration console-s
 EOF
 
 if [ -e "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf" ]; then
-  sed -i 's/^#\?domain-name=.*/domain-name=univrs/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
+  # sed -i 's/^#\?domain-name=.*/domain-name=local/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
   sed -i 's/^#\?use-ipv6=.*/use-ipv6=no/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
   sed -i 's/^#\?publish-workstation=.*/publish-workstation=yes/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
 fi
