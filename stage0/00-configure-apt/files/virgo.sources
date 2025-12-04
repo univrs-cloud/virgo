@@ -3,4 +3,4 @@ URIs: https://packages.univrs.cloud/
 Suites: stable
 Components: main
 Architectures: arm64
-Signed-By: /etc/apt/trusted.gpg.d/virgo-packages.gpg
+Signed-By: /usr/share/keyrings/virgo-packages-keyring.gpg
