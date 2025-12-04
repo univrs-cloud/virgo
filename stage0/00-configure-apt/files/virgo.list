@@ -1,1 +1,0 @@
-deb [arch=arm64 signed-by=/usr/share/keyrings/virgo-packages-keyring.gpg] https://packages.univrs.cloud stable main
