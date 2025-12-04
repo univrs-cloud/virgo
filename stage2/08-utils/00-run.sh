@@ -1,8 +1,9 @@
 #!/bin/bash -e
 
 on_chroot << EOF
-curl -fsSL https://raw.githubusercontent.com/tj/n/master/bin/n | bash -s lts
-npm install -g n
+curl -fsSL -o /usr/local/bin/n https://raw.githubusercontent.com/tj/n/master/bin/n 
+chmod 0755 /usr/local/bin/n
+n 22
 
 systemctl enable redis-server
 EOF
