@@ -55,7 +55,7 @@ fi
 CONTAINER_NAME=${CONTAINER_NAME:-virgo_work}
 CONTINUE=${CONTINUE:-0}
 PRESERVE_CONTAINER=${PRESERVE_CONTAINER:-0}
-PIGEN_DOCKER_OPTS=${PIGEN_DOCKER_OPTS:-""}
+VIRGO_DOCKER_OPTS=${VIRGO_DOCKER_OPTS:-""}
 
 if [ -z "${IMG_NAME}" ]; then
 	echo "IMG_NAME not set in 'config'" 1>&2
@@ -135,7 +135,7 @@ time ${DOCKER} run \
   $DOCKER_CMDLINE_PRE \
   --name "${DOCKER_CMDLINE_NAME}" \
   --privileged \
-  ${PIGEN_DOCKER_OPTS} \
+  ${VIRGO_DOCKER_OPTS} \
   --volume "${CONFIG_FILE}":/config:ro \
   -e "GIT_HASH=${GIT_HASH}" \
   $DOCKER_CMDLINE_POST \
