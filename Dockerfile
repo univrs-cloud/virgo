@@ -11,6 +11,6 @@ RUN apt-get -y update && \
         binfmt-support ca-certificates fdisk gpg pigz arch-test \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . /pi-gen/
+COPY . /virgo/
 
-VOLUME [ "/pi-gen/work", "/pi-gen/deploy"]
+VOLUME [ "/virgo/work", "/virgo/deploy"]
