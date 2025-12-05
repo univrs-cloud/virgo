@@ -1,6 +1,3 @@
-<img width="1440" height="960" alt="image" src="https://github.com/user-attachments/assets/4a11fc12-6c94-4fe1-a5f4-e7c266706747" />
-<img width="1440" height="960" alt="image" src="https://github.com/user-attachments/assets/0ffb18a7-e0ff-450f-ba66-56dbab5f0f10" />
-
 # virgo
 
 Tool used to create virgoOS images.
