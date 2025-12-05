@@ -327,7 +327,7 @@ solution).
 
 ### Passing arguments to Docker
 
-When the docker image is run various required command line arguments are provided.  For example the system mounts the `/dev` directory to the `/dev` directory within the docker container.  If other arguments are required they may be specified in the PIGEN_DOCKER_OPTS environment variable.  For example setting `PIGEN_DOCKER_OPTS="--add-host foo:192.168.0.23"` will add '192.168.0.23   foo' to the `/etc/hosts` file in the container.  The `--name`
+When the docker image is run various required command line arguments are provided.  For example the system mounts the `/dev` directory to the `/dev` directory within the docker container.  If other arguments are required they may be specified in the VIRGO_DOCKER_OPTS environment variable.  For example setting `VIRGO_DOCKER_OPTS="--add-host foo:192.168.0.23"` will add '192.168.0.23   foo' to the `/etc/hosts` file in the container.  The `--name`
 and `--privileged` options are already set by the script and should not be redefined.
 
 ## Stage Anatomy
@@ -355,7 +355,7 @@ maintenance and allows for more easy customization.
    Stage 2 installs some optimized memory functions, sets timezone and charmap
    defaults, installs fake-hwclock and ntp, wireless LAN and bluetooth support,
    dphys-swapfile, and other basics for managing the hardware.  It also
-   creates necessary groups and gives the pi user access to sudo and the
+   creates necessary groups and gives the user access to sudo and the
    standard console hardware permission groups.
 
    Note: virgoOS Lite contains a number of tools for development,
@@ -374,7 +374,7 @@ to `./stage2` (if building a minimal system).
 
 ```bash
 # Example for building a lite system
-echo "IMG_NAME='raspios'" > config
+echo "IMG_NAME='spica'" > config
 touch ./stage3/SKIP ./stage4/SKIP ./stage5/SKIP
 touch ./stage4/SKIP_IMAGES ./stage5/SKIP_IMAGES
 sudo ./build.sh  # or ./build-docker.sh
