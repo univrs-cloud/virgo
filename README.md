@@ -10,7 +10,7 @@ always advise you use the latest OS for security reasons.
 On other Linux distributions it may be possible to use the Docker build described
 below.
 
-To install the required dependencies for `virgoOS` you should run:
+To install the required dependencies for `virgo` you should run:
 
 ```bash
 apt install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
@@ -42,7 +42,7 @@ git clone https://github.com/univrs-cloud/virgo.git
 the latest revision of the repository. Do not do this on your development machine.
 
 Also, be careful to clone the repository to a base path **NOT** containing spaces.
-This configuration is not supported by debootstrap and will lead to `virgoOS` not
+This configuration is not supported by debootstrap and will lead to `virgo` not
 running.
 
 After cloning the repository, you can move to the next step and start configuring
@@ -91,12 +91,12 @@ The following environment variables are supported:
 
    **CAUTION**: Currently, changing this value will probably break build.sh
 
-   Top-level directory for `virgoOS`.  Contains stage directories, build
+   Top-level directory for `virgo`.  Contains stage directories, build
    scripts, and by default both work and deployment directories.
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work`)
 
-   Directory in which `virgoOS` builds the target system.  This value can be
+   Directory in which `virgo` builds the target system.  This value can be
    changed if you have a suitably large, fast storage location for stages to
    be built and cached.  Note, `WORK_DIR` stores a complete copy of the target
    system for each build stage, amounting to tens of gigabytes in the case of
@@ -415,7 +415,7 @@ git clone --branch arm64 https://github.com/univrs-cloud/virgo.git
 ## `binfmt_misc`
 
 Linux is able to execute binaries from other architectures, meaning that it should be
-possible to make use of `virgoOS` on an x86_64 system, even though it will be running
+possible to make use of `virgo` on an x86_64 system, even though it will be running
 ARM binaries. This requires support from the [`binfmt_misc`](https://en.wikipedia.org/wiki/Binfmt_misc)
 kernel module.
 

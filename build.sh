@@ -202,9 +202,9 @@ export DEPLOY_COMPRESSION=${DEPLOY_COMPRESSION:-zip}
 export COMPRESSION_LEVEL=${COMPRESSION_LEVEL:-6}
 export LOG_FILE="${WORK_DIR}/build.log"
 
-export TARGET_HOSTNAME=${TARGET_HOSTNAME:-raspberrypi}
+export TARGET_HOSTNAME=${TARGET_HOSTNAME:-m87}
 
-export FIRST_USER_NAME=${FIRST_USER_NAME:-pi}
+export FIRST_USER_NAME=${FIRST_USER_NAME:-virgo}
 export FIRST_USER_PASS
 export DISABLE_FIRST_BOOT_USER_RENAME=${DISABLE_FIRST_BOOT_USER_RENAME:-0}
 export WPA_COUNTRY
@@ -265,7 +265,7 @@ PAGESIZE=$(getconf PAGESIZE)
 if [ "$ARCH" == "armhf" ] && [ "$PAGESIZE" != "4096" ]; then
 	echo
 	echo "ERROR: Building an $ARCH image requires a kernel with a 4k page size (current: $PAGESIZE)"
-	echo "On Raspberry Pi OS (64-bit), you can switch to a suitable kernel by adding the following to /boot/firmware/config.txt and rebooting:"
+	echo "On virgoOS (64-bit), you can switch to a suitable kernel by adding the following to /boot/firmware/config.txt and rebooting:"
 	echo
 	echo "kernel=kernel8.img"
 	echo "initramfs initramfs8 followkernel"

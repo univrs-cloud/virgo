@@ -1,6 +1,6 @@
-Cloud-Init support for Raspberry Pi OS
+Cloud-Init support for virgoOS
 
-Reference for Raspberry Pi custom cloud-init config module: https://cloudinit.readthedocs.io/en/latest/reference/modules.html#raspberry-pi-configuration
+Reference for virgoOS custom cloud-init config module: https://cloudinit.readthedocs.io/en/latest/reference/modules.html#raspberry-pi-configuration
 
 - files/network-config is required because otherwise imager would fail to create the correct filesystem entry
 
