@@ -4,13 +4,13 @@ Tool used to create virgoOS images.
 
 ## Dependencies
 
-virgo runs on Debian-based operating systems released after 2017, and we
+virgoOS runs on Debian-based operating systems released after 2017, and we
 always advise you use the latest OS for security reasons.
 
 On other Linux distributions it may be possible to use the Docker build described
 below.
 
-To install the required dependencies for `virgo` you should run:
+To install the required dependencies for `virgoOS` you should run:
 
 ```bash
 apt install coreutils quilt parted qemu-user-static debootstrap zerofree zip \
@@ -19,11 +19,11 @@ gpg pigz xxd arch-test bmap-tools kmod
 ```
 
 ```bash
-wget https://ftp-master.debian.org/keys/archive-key-12.asc
-wget https://ftp-master.debian.org/keys/archive-key-12-security.asc
+wget https://ftp-master.debian.org/keys/archive-key-13.asc
+wget https://ftp-master.debian.org/keys/archive-key-13-security.asc
 mkdir -p /usr/share/keyrings/
-gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-12.asc
-gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-12-security.asc
+gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-13.asc
+gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-13-security.asc
 ```
 
 The file `depends` contains a list of tools needed.  The format of this
@@ -42,7 +42,7 @@ git clone https://github.com/univrs-cloud/virgo.git
 the latest revision of the repository. Do not do this on your development machine.
 
 Also, be careful to clone the repository to a base path **NOT** containing spaces.
-This configuration is not supported by debootstrap and will lead to `virgo` not
+This configuration is not supported by debootstrap and will lead to `virgoOS` not
 running.
 
 After cloning the repository, you can move to the next step and start configuring
@@ -64,8 +64,7 @@ The following environment variables are supported:
 
  * `PI_GEN_RELEASE` (Default: `virgoOS Spica`)
 
-   The release name to use in `/etc/issue.txt`. The default should only be used
-   for official Raspberry Pi builds.
+   The release name to use in `/etc/issue.txt`.
 
 * `RELEASE` (Default: `trixie`)
 
@@ -92,12 +91,12 @@ The following environment variables are supported:
 
    **CAUTION**: Currently, changing this value will probably break build.sh
 
-   Top-level directory for `virgo`.  Contains stage directories, build
+   Top-level directory for `virgoOS`.  Contains stage directories, build
    scripts, and by default both work and deployment directories.
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work`)
 
-   Directory in which `virgo` builds the target system.  This value can be
+   Directory in which `virgoOS` builds the target system.  This value can be
    changed if you have a suitably large, fast storage location for stages to
    be built and cached.  Note, `WORK_DIR` stores a complete copy of the target
    system for each build stage, amounting to tens of gigabytes in the case of
@@ -191,7 +190,7 @@ The following environment variables are supported:
 
  * `ENABLE_SSH` (Default: `1`)
 
-   Setting to `1` will enable ssh server for remote log in. Note that if you are using a common password such as the defaults there is a high risk of attackers taking over you Raspberry Pi.
+   Setting to `1` will enable ssh server for remote log in. Note that if you are using a common password such as the defaults there is a high risk of attackers taking over.
 
   * `PUBKEY_SSH_FIRST_USER` (Default: unset)
 
@@ -207,24 +206,24 @@ The following environment variables are supported:
 
  * `SETFCAP` (Default: unset)
 
-   * Setting to `1` will prevent virgo from dropping the "capabilities"
+   * Setting to `1` will prevent virgoOS from dropping the "capabilities"
    feature. Generating the root filesystem with capabilities enabled and running
    it from a filesystem that does not support capabilities (like NFS) can cause
    issues. Only enable this if you understand what it is.
 
  * `STAGE_LIST` (Default: `stage*`)
 
-    If set, then instead of working through the numeric stages in order, this list will be followed. For example setting to `"stage0 stage1 mystage stage2"` will run the contents of `mystage` before stage2. Note that quotes are needed around the list. An absolute or relative path can be given for stages outside the virgo directory.
+    If set, then instead of working through the numeric stages in order, this list will be followed. For example setting to `"stage0 stage1 mystage stage2"` will run the contents of `mystage` before stage2. Note that quotes are needed around the list. An absolute or relative path can be given for stages outside the virgoOS directory.
 
  * `EXPORT_CONFIG_DIR` (Default: `$BASE_DIR/export-image`)
 
-    If set, use this directory path as the location of scripts to run when generating images. An absolute or relative path can be given for a location outside the virgo directory.
+    If set, use this directory path as the location of scripts to run when generating images. An absolute or relative path can be given for a location outside the virgoOS directory.
 
  * `ENABLE_CLOUD_INIT` (Default: `1`)
 
-    If set to `1`, cloud-init and netplan will be installed and configured. This will allow you to configure your Raspberry Pi using cloud-init configuration files. The cloud-init configuration files should be placed in the bootfs or by editing the files in `stage2/04-cloud-init/files`. Cloud-init will be configured to read them on first boot.
+    If set to `1`, cloud-init and netplan will be installed and configured. This will allow you to configure your system using cloud-init configuration files. The cloud-init configuration files should be placed in the bootfs or by editing the files in `stage2/04-cloud-init/files`. Cloud-init will be configured to read them on first boot.
 
-A simple example for building Raspberry Pi OS:
+A simple example for building virgoOS:
 
 ```bash
 IMG_NAME='Spica'
@@ -352,30 +351,17 @@ maintenance and allows for more easy customization.
    stage the system should boot to a local console from which you have the
    means to perform basic tasks needed to configure and install the system.
 
- - **Stage 2** - lite system.  This stage produces the Raspberry Pi OS Lite image.
+ - **Stage 2** - lite system.  This stage produces the virgoOS Lite image.
    Stage 2 installs some optimized memory functions, sets timezone and charmap
    defaults, installs fake-hwclock and ntp, wireless LAN and bluetooth support,
    dphys-swapfile, and other basics for managing the hardware.  It also
    creates necessary groups and gives the pi user access to sudo and the
    standard console hardware permission groups.
 
-   Note: Raspberry Pi OS Lite contains a number of tools for development,
+   Note: virgoOS Lite contains a number of tools for development,
    including `Python`, `Lua` and the `build-essential` package. If you are
    creating an image to deploy in products, be sure to remove extraneous development
    tools before deployment.
-
- - **Stage 3** - desktop system.  Here's where you get the full desktop system
-   with X11 and LXDE, web browsers, git for development, Raspberry Pi OS custom UI
-   enhancements, etc.  This is a base desktop system, with some development
-   tools installed.
-
- - **Stage 4** - Normal Raspberry Pi OS image. System meant to fit on a 4GB card.
-   This is the    stage that installs most things that make Raspberry Pi OS friendly
-   to new users - e.g. system documentation.
-
- - **Stage 5** - The Raspberry Pi OS Full image. More development
-   tools, an email client, learning tools like Scratch, specialized packages
-   like sonic-pi, office productivity, etc.
 
 ### Stage specification
 
@@ -426,17 +412,10 @@ by the one below, and follow the rest of the documentation:
 git clone --branch arm64 https://github.com/univrs-cloud/virgo.git
 ```
 
-If you want to generate a 64 bits image from a Raspberry Pi running a 32 bits
-version, you need to add `arm_64bit=1` to your `config.txt` file and reboot your
-machine. This will restart your machine with a 64 bits kernel. This will only
-work from a Raspberry Pi with a 64-bit capable processor (i.e. Raspberry Pi Zero
-2, Raspberry Pi 3 or Raspberry Pi 4).
-
-
 ## `binfmt_misc`
 
 Linux is able to execute binaries from other architectures, meaning that it should be
-possible to make use of `virgo` on an x86_64 system, even though it will be running
+possible to make use of `virgoOS` on an x86_64 system, even though it will be running
 ARM binaries. This requires support from the [`binfmt_misc`](https://en.wikipedia.org/wiki/Binfmt_misc)
 kernel module.
 
