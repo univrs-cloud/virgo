@@ -82,7 +82,7 @@ fi
 # Modify original build-options to allow config file to be mounted in the docker container
 BUILD_OPTS="$(echo "${BUILD_OPTS:-}" | sed -E 's@\-c\s?([^ ]+)@-c /config@')"
 
-${DOCKER} build --build-arg BASE_IMAGE=debian:trixie -t pi-gen "${DIR}"
+${DOCKER} build --build-arg BASE_IMAGE=debian:trixie -t virgo "${DIR}"
 
 if [ "${CONTAINER_EXISTS}" != "" ]; then
   DOCKER_CMDLINE_NAME="${CONTAINER_NAME}_cont"
@@ -139,19 +139,19 @@ time ${DOCKER} run \
   --volume "${CONFIG_FILE}":/config:ro \
   -e "GIT_HASH=${GIT_HASH}" \
   $DOCKER_CMDLINE_POST \
-  pi-gen \
+  virgo \
   bash -e -o pipefail -c "
     dpkg-reconfigure qemu-user-static &&
     # binfmt_misc is sometimes not mounted with debian trixie image
     (mount binfmt_misc -t binfmt_misc /proc/sys/fs/binfmt_misc || true) &&
-    cd /pi-gen; ./build.sh ${BUILD_OPTS} &&
+    cd /virgo; ./build.sh ${BUILD_OPTS} &&
     rsync -av work/*/build.log deploy/
   " &
   wait "$!"
 
 # Ensure that deploy/ is always owned by calling user
 echo "copying results from deploy/"
-${DOCKER} cp "${CONTAINER_NAME}":/pi-gen/deploy - | tar -xf -
+${DOCKER} cp "${CONTAINER_NAME}":/virgo/deploy - | tar -xf -
 
 echo "copying log from container ${CONTAINER_NAME} to deploy/"
 ${DOCKER} logs --timestamps "${CONTAINER_NAME}" &>deploy/build-docker.log
