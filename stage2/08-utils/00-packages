@@ -4,5 +4,6 @@ hdparm
 sqlite3
 msmtp-mta bsd-mailx
 redis-server
+pcp-zeroconf
 virgo-api
 virgo-ui
