@@ -10,4 +10,5 @@ n 22
 systemctl enable redis-server
 systemctl disable pmcd pmlogger pmlogger_farm pmproxy
 systemctl disable pmlogger_check.timer pmlogger_daily.timer pmlogger_farm_check.timer
+systemctl disable nvmf-autoconnect.service nvmefc-boot-connections.service
 EOF
