@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-install -v -d -m 775 -o pcp -g pcp "${ROOTFS_DIR}/var/log/pcp/pmlogger"
+install -v -d "${ROOTFS_DIR}/var/log/pcp/pmlogger"
 
 on_chroot << EOF
 curl -fsSL -o /usr/local/bin/n https://raw.githubusercontent.com/tj/n/master/bin/n 
