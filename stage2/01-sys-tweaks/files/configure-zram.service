@@ -1,0 +1,12 @@
+[Unit]
+Description=Configure zram based on RAM size (one-time)
+Before=zramswap.service
+DefaultDependencies=no
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/configure-zram-size
+RemainAfterExit=no
+
+[Install]
+WantedBy=sysinit.target
