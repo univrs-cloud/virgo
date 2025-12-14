@@ -8,6 +8,6 @@ chmod 0755 /usr/local/bin/n
 n 22
 
 systemctl enable redis-server
-systemctl disable pmcd pmlogger pmlogger_farm pmproxy
 systemctl disable pmlogger_check.timer pmlogger_daily.timer pmlogger_farm_check.timer
+systemctl disable pmcd pmlogger.service pmlogger_farm.service pmproxy.service
 EOF
