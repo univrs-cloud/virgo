@@ -1,0 +1,27 @@
+#!/bin/bash
+INTERFACE="$1"
+
+if [ "$INTERFACE" != "bond0" ]; then
+    exit 0
+fi
+
+GATEWAY=$(nmcli -g ipv4.gateway connection show bond0 2>/dev/null)
+
+if [ -z "$GATEWAY" ]; then
+    logger "No gateway configured for bond0, skipping wait"
+    exit 0
+fi
+
+MAX_RETRIES=60
+RETRY_INTERVAL=1
+
+for i in $(seq 1 $MAX_RETRIES); do
+    if ping -c 1 -W 1 "$GATEWAY" &>/dev/null; then
+        logger "Gateway $GATEWAY reachable after $i seconds"
+        exit 0
+    fi
+    sleep $RETRY_INTERVAL
+done
+
+logger "Warning: Gateway $GATEWAY not reachable after $MAX_RETRIES seconds"
+exit 0
