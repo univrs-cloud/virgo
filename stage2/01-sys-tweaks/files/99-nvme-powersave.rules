@@ -1,0 +1,2 @@
+ACTION=="add", KERNEL=="nvme0", SUBSYSTEM=="nvme", RUN+="/bin/sleep 3", RUN+="/usr/sbin/nvme set-feature -f 0x02 -V 0x01 /dev/nvme0"
+ACTION=="add", KERNEL=="nvme1", SUBSYSTEM=="nvme", RUN+="/bin/sleep 3", RUN+="/usr/sbin/nvme set-feature -f 0x02 -V 0x01 /dev/nvme1"
