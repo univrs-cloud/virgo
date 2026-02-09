@@ -1,0 +1,63 @@
+#!/bin/bash -e
+
+# Create rules directory
+mkdir -p "${ROOTFS_DIR}/etc/iptables"
+
+# Create IPv4 rules file
+cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Allow loopback (localhost) - this allows PCP ports on 127.0.0.1
+-A INPUT -i lo -j ACCEPT
+
+# Allow established and related connections
+-A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# Allow specific services from ANY IPv4 address
+-A INPUT -p tcp --dport 22 -j ACCEPT     # SSH
+-A INPUT -p tcp --dport 25 -j ACCEPT     # SMTP
+-A INPUT -p tcp --dport 53 -j ACCEPT     # DNS
+-A INPUT -p udp --dport 53 -j ACCEPT     # DNS
+-A INPUT -p tcp --dport 80 -j ACCEPT     # HTTP
+-A INPUT -p tcp --dport 139 -j ACCEPT    # NetBIOS
+-A INPUT -p tcp --dport 443 -j ACCEPT    # HTTPS
+-A INPUT -p tcp --dport 445 -j ACCEPT    # SMB/CIFS
+-A INPUT -p tcp --dport 465 -j ACCEPT    # SMTPS
+-A INPUT -p tcp --dport 587 -j ACCEPT    # SMTP Submission
+-A INPUT -p tcp --dport 993 -j ACCEPT    # IMAPS
+-A INPUT -p tcp --dport 3000 -j ACCEPT   # PPP
+-A INPUT -p tcp --dport 3478 -j ACCEPT   # STUN
+-A INPUT -p udp --dport 3478 -j ACCEPT   # STUN (UDP)
+-A INPUT -p tcp --dport 4190 -j ACCEPT   # Sieve
+
+# PCP ports (4330, 44321, 44322, 44323) are NOT listed here
+# They're only accessible via localhost (covered by -i lo rule above)
+
+# Everything else is DROPPED by default policy
+
+COMMIT
+EOF
+
+# Create IPv6 rules file - block everything
+cat > "${ROOTFS_DIR}/etc/iptables/rules.v6" << 'EOF'
+*filter
+:INPUT DROP [0:0]
+:FORWARD DROP [0:0]
+:OUTPUT DROP [0:0]
+
+# Allow loopback only
+-A INPUT -i lo -j ACCEPT
+-A OUTPUT -o lo -j ACCEPT
+
+# Block everything else
+
+COMMIT
+EOF
+
+# Enable netfilter-persistent service
+on_chroot << EOF
+systemctl enable netfilter-persistent
+EOF
