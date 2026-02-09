@@ -27,14 +27,16 @@ cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
 -A INPUT -p tcp --dport 80 -j ACCEPT     # HTTP
 -A INPUT -p tcp --dport 139 -j ACCEPT    # NetBIOS
 -A INPUT -p tcp --dport 443 -j ACCEPT    # HTTPS
+-A INPUT -p udp --dport 443 -j ACCEPT    # HTTPS (QUIC/HTTP3)
 -A INPUT -p tcp --dport 445 -j ACCEPT    # SMB/CIFS
 -A INPUT -p tcp --dport 465 -j ACCEPT    # SMTPS
 -A INPUT -p tcp --dport 587 -j ACCEPT    # SMTP Submission
 -A INPUT -p tcp --dport 993 -j ACCEPT    # IMAPS
--A INPUT -p tcp --dport 3000 -j ACCEPT   # PPP
+-A INPUT -p tcp --dport 3000 -j ACCEPT   # Custom service
 -A INPUT -p tcp --dport 3478 -j ACCEPT   # STUN
 -A INPUT -p udp --dport 3478 -j ACCEPT   # STUN (UDP)
 -A INPUT -p tcp --dport 4190 -j ACCEPT   # Sieve
+-A INPUT -p udp --dport 51820 -j ACCEPT  # WireGuard VPN
 
 # PCP ports (4330, 44321, 44322, 44323) are NOT listed here
 # They're only accessible via localhost (covered by -i lo rule above)
