@@ -36,6 +36,8 @@ cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
 -A INPUT -p tcp --dport 3478 -j ACCEPT   # STUN
 -A INPUT -p udp --dport 3478 -j ACCEPT   # STUN (UDP)
 -A INPUT -p tcp --dport 4190 -j ACCEPT   # Sieve
+-A INPUT -p tcp --dport 6881 -j ACCEPT   # qBittorrent
+-A INPUT -p udp --dport 6881 -j ACCEPT   # qBittorrent
 -A INPUT -p udp --dport 51820 -j ACCEPT  # WireGuard VPN
 
 # PCP ports (4330, 44321, 44322, 44323) are NOT listed here
