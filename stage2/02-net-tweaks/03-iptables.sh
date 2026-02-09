@@ -16,6 +16,9 @@ cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
 # Allow established and related connections
 -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
+# Allow ICMP (ping)
+-A INPUT -p icmp -j ACCEPT
+
 # Allow specific services from ANY IPv4 address
 -A INPUT -p tcp --dport 22 -j ACCEPT     # SSH
 -A INPUT -p tcp --dport 25 -j ACCEPT     # SMTP
