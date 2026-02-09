@@ -24,6 +24,8 @@ cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
 -A INPUT -p tcp --dport 25 -j ACCEPT     # SMTP
 -A INPUT -p tcp --dport 53 -j ACCEPT     # DNS
 -A INPUT -p udp --dport 53 -j ACCEPT     # DNS
+-A INPUT -p udp --dport 67 -j ACCEPT     # DHCP Server
+-A INPUT -p udp --dport 68 -j ACCEPT     # DHCP Client
 -A INPUT -p tcp --dport 80 -j ACCEPT     # HTTP
 -A INPUT -p udp --dport 137 -j ACCEPT    # NetBIOS Name Service
 -A INPUT -p udp --dport 138 -j ACCEPT    # NetBIOS Datagram Service
