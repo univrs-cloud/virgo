@@ -25,7 +25,9 @@ cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
 -A INPUT -p tcp --dport 53 -j ACCEPT     # DNS
 -A INPUT -p udp --dport 53 -j ACCEPT     # DNS
 -A INPUT -p tcp --dport 80 -j ACCEPT     # HTTP
--A INPUT -p tcp --dport 139 -j ACCEPT    # NetBIOS
+-A INPUT -p udp --dport 137 -j ACCEPT    # NetBIOS Name Service
+-A INPUT -p udp --dport 138 -j ACCEPT    # NetBIOS Datagram Service
+-A INPUT -p tcp --dport 139 -j ACCEPT    # NetBIOS Session Service
 -A INPUT -p tcp --dport 443 -j ACCEPT    # HTTPS
 -A INPUT -p udp --dport 443 -j ACCEPT    # HTTPS (QUIC/HTTP3)
 -A INPUT -p tcp --dport 445 -j ACCEPT    # SMB/CIFS
@@ -36,6 +38,8 @@ cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
 -A INPUT -p tcp --dport 3478 -j ACCEPT   # STUN
 -A INPUT -p udp --dport 3478 -j ACCEPT   # STUN (UDP)
 -A INPUT -p tcp --dport 4190 -j ACCEPT   # Sieve
+-A INPUT -p udp --dport 5353 -j ACCEPT   # mDNS/Bonjour (macOS discovery)
+-A INPUT -p udp --dport 5355 -j ACCEPT   # LLMNR (Windows discovery)
 -A INPUT -p tcp --dport 6881 -j ACCEPT   # qBittorrent
 -A INPUT -p udp --dport 6881 -j ACCEPT   # qBittorrent
 -A INPUT -p udp --dport 51820 -j ACCEPT  # WireGuard VPN
