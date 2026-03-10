@@ -3,3 +3,4 @@ work/*
 postrun.sh
 .pc
 *-pc
+.vscode/
