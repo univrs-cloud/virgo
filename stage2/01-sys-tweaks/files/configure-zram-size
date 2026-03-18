@@ -25,9 +25,10 @@ systemctl restart zramswap.service
 
 echo "Configured zram: ${PERCENT}% of RAM with zstd compression"
 
-# Remove the service file and reload systemd
+# Remove the service file, drop-in, and reload systemd
 systemctl disable --now configure-zram.service
 rm -f /etc/systemd/system/configure-zram.service
+rm -rf /etc/systemd/system/zramswap.service.d
 systemctl daemon-reload
 
 echo "configure-zram.service removed after initial configuration"
