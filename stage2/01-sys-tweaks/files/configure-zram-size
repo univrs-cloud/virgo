@@ -17,7 +17,7 @@ sed -i "s/^PERCENT=.*/PERCENT=$PERCENT/" /etc/default/zramswap
 sed -i "s/^#ALGO=.*/ALGO=zstd/" /etc/default/zramswap
 sed -i "s/^ALGO=.*/ALGO=zstd/" /etc/default/zramswap
 
-systemctl restart zramsawp.service
+systemctl restart zramswap.service
 
 echo "Configured zram: ${PERCENT}% of RAM with zstd compression"
 
