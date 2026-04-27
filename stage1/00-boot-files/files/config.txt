@@ -47,7 +47,7 @@ over_voltage_delta=50000
 arm_freq=2000 # default 1500
 [board-type=0x17] # pi5
 dtparam=rtc_bbat_vchg=3000000
-arm_freq=2800 # default 2400
+#arm_freq=2500 # default 2400
 
 [all]
 
