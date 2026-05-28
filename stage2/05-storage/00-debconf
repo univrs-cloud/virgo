@@ -1,1 +1,2 @@
 zfs-dkms zfs-dkms/note-incompatible-licenses note true
+zfs-dkms zfs-dkms/experimental-on-rt-kernel boolean true
