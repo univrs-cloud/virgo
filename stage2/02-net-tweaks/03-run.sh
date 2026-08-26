@@ -52,6 +52,7 @@ cat > "${ROOTFS_DIR}/etc/iptables/rules.v4" << 'EOF'
 # IMAPS
 -A INPUT -p tcp --dport 993 -j ACCEPT
 # Custom service
+-A INPUT -p tcp --dport 2999 -j ACCEPT
 -A INPUT -p tcp --dport 3000 -j ACCEPT
 # STUN
 -A INPUT -p tcp --dport 3478 -j ACCEPT
