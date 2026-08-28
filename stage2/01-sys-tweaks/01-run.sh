@@ -64,4 +64,5 @@ if [ -e "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf" ]; then
   # sed -i 's/^#\?domain-name=.*/domain-name=local/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
   sed -i 's/^#\?use-ipv6=.*/use-ipv6=no/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
   sed -i 's/^#\?publish-workstation=.*/publish-workstation=yes/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
+  sed -i 's/^#\?allow-interfaces=.*/allow-interfaces=bond0,eth0,eth1/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
 fi

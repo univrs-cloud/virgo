@@ -8,7 +8,7 @@ python3-gpiozero
 python3-rpi-lgpio
 python3-spidev
 python3-smbus2
-avahi-daemon
+avahi-daemon avahi-utils
 lua5.1
 luajit
 ca-certificates curl
