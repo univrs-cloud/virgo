@@ -12,7 +12,7 @@ if [ -z "$GATEWAY" ]; then
     exit 0
 fi
 
-MAX_RETRIES=60
+MAX_RETRIES=10
 RETRY_INTERVAL=1
 
 for i in $(seq 1 $MAX_RETRIES); do
