@@ -12,7 +12,6 @@
 INTERFACE="$1"
 ACTION="$2"
 CARRIER_TIMEOUT=60
-SERVICE_FILE=/etc/avahi/services/univrs.service
 
 if [ "$INTERFACE" != "bond0" ]; then
 	exit 0
@@ -44,24 +43,18 @@ if ! ip -o link show "$INTERFACE" 2>/dev/null | grep -q 'LOWER_UP'; then
 	logger -t reannounce-mdns "$INTERFACE still not carrying after ${CARRIER_TIMEOUT}s; announcing anyway."
 fi
 
-# Reload rather than restart: it re-reads the static services and announces them again while leaving
-# active browses and their cached peers alone. A restart would drop every browse on this node,
-# including the one discovery depends on.
-if systemctl reload avahi-daemon 2>/dev/null; then
+# Restart, not reload. Reload re-reads the static service files and re-establishes anything that
+# changed, but a service group whose content is identical is left alone — so it puts nothing on the
+# wire, which is exactly the case here: the file is the same as it was before the reboot. Verified on
+# hardware; a reload on one node produced no change on its peer, a restart produced it immediately.
+#
+# The cost is that this node's own browses are dropped and its peer cache is lost. That is survivable:
+# discovery supervises its browse and restarts it, and the settle window re-confirms peers rather than
+# publishing an empty network.
+if systemctl restart avahi-daemon; then
 	logger -t reannounce-mdns "Re-announced mDNS services after ${waited}s on $INTERFACE."
-	exit 0
-fi
-
-# Avahi watches its services directory, so replacing the file re-registers the service even where
-# reload is unavailable. Staged outside that directory so the rename is the only event it sees.
-if [ -f "$SERVICE_FILE" ]; then
-	temporary="/etc/avahi/.$(basename "$SERVICE_FILE").reannounce"
-	if cp -p "$SERVICE_FILE" "$temporary" && mv "$temporary" "$SERVICE_FILE"; then
-		logger -t reannounce-mdns "Reload unavailable; re-registered $SERVICE_FILE after ${waited}s."
-	else
-		rm -f "$temporary"
-		logger -t reannounce-mdns "Could not re-announce mDNS services on $INTERFACE."
-	fi
+else
+	logger -t reannounce-mdns "Could not restart avahi-daemon to re-announce on $INTERFACE."
 fi
 
 exit 0
