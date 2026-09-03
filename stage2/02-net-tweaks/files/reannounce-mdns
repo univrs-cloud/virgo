@@ -1,0 +1,67 @@
+#!/bin/bash
+# Avahi registers its static services when it starts, which on this appliance is before the bond
+# carries traffic: bond0 is created with updelay, so the link exists for up to a minute before it
+# forwards. The announcement goes out over a dead link and is never repeated — mDNS announces a few
+# times at registration and then stays quiet until something asks. A peer that already dropped this
+# node from its cache will not ask again for minutes, because a browse backs its query interval off
+# the longer it runs, so the node stays invisible long after it is up.
+#
+# NetworkManager owns bond readiness, so it is what says when to announce again. Expressing this as a
+# systemd ordering does not work: network-online.target is reached while the bond is still in updelay.
+
+INTERFACE="$1"
+ACTION="$2"
+CARRIER_TIMEOUT=60
+SERVICE_FILE=/etc/avahi/services/univrs.service
+
+if [ "$INTERFACE" != "bond0" ]; then
+	exit 0
+fi
+
+if [ "$ACTION" != "up" ] && [ "$ACTION" != "reapply" ]; then
+	exit 0
+fi
+
+if ! systemctl is-active --quiet avahi-daemon; then
+	exit 0
+fi
+
+# The event can arrive before the bond forwards, because 10-wait-for-gateway gives up after ten
+# seconds and an unreachable gateway is not a reason to refuse to come up. Waiting is not optional
+# here: NetworkManager sends nothing further once the connection is active, so a script that gave up
+# and exited would leave the node silent until some other node happened to ask.
+waited=0
+while [ "$waited" -lt "$CARRIER_TIMEOUT" ]; do
+	if ip -o link show "$INTERFACE" 2>/dev/null | grep -q 'LOWER_UP'; then
+		break
+	fi
+
+	sleep 1
+	waited=$((waited + 1))
+done
+
+if ! ip -o link show "$INTERFACE" 2>/dev/null | grep -q 'LOWER_UP'; then
+	logger -t reannounce-mdns "$INTERFACE still not carrying after ${CARRIER_TIMEOUT}s; announcing anyway."
+fi
+
+# Reload rather than restart: it re-reads the static services and announces them again while leaving
+# active browses and their cached peers alone. A restart would drop every browse on this node,
+# including the one discovery depends on.
+if systemctl reload avahi-daemon 2>/dev/null; then
+	logger -t reannounce-mdns "Re-announced mDNS services after ${waited}s on $INTERFACE."
+	exit 0
+fi
+
+# Avahi watches its services directory, so replacing the file re-registers the service even where
+# reload is unavailable. Staged outside that directory so the rename is the only event it sees.
+if [ -f "$SERVICE_FILE" ]; then
+	temporary="/etc/avahi/.$(basename "$SERVICE_FILE").reannounce"
+	if cp -p "$SERVICE_FILE" "$temporary" && mv "$temporary" "$SERVICE_FILE"; then
+		logger -t reannounce-mdns "Reload unavailable; re-registered $SERVICE_FILE after ${waited}s."
+	else
+		rm -f "$temporary"
+		logger -t reannounce-mdns "Could not re-announce mDNS services on $INTERFACE."
+	fi
+fi
+
+exit 0
