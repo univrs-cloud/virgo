@@ -64,5 +64,11 @@ if [ -e "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf" ]; then
   # sed -i 's/^#\?domain-name=.*/domain-name=local/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
   sed -i 's/^#\?use-ipv6=.*/use-ipv6=no/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
   sed -i 's/^#\?publish-workstation=.*/publish-workstation=yes/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
-  sed -i 's/^#\?allow-interfaces=.*/allow-interfaces=bond0,eth0,eth1/' "${ROOTFS_DIR}/etc/avahi/avahi-daemon.conf"
 fi
+
+install -v -m 755 -D files/avahi-allow-interfaces "${ROOTFS_DIR}/usr/local/sbin/avahi-allow-interfaces"
+install -v -m 644 -D files/avahi-allow-interfaces.service "${ROOTFS_DIR}/lib/systemd/system/avahi-allow-interfaces.service"
+
+on_chroot <<- EOF
+	systemctl enable avahi-allow-interfaces
+EOF

@@ -1,0 +1,11 @@
+[Unit]
+Description=Restrict Avahi to this machine's real network interfaces
+Before=avahi-daemon.service
+ConditionPathExists=/etc/avahi/avahi-daemon.conf
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/avahi-allow-interfaces
+
+[Install]
+WantedBy=avahi-daemon.service

@@ -1,0 +1,98 @@
+#!/bin/bash
+set -u
+
+CONFIGURATION=/etc/avahi/avahi-daemon.conf
+ALWAYS_ALLOWED=bond0
+ARPHRD_ETHER=1
+
+if [ ! -e "$CONFIGURATION" ]; then
+	exit 0
+fi
+
+exists() {
+	[ -e "$1" ] || [ -L "$1" ]
+}
+
+is_wanted() {
+	local path="$1"
+
+	if exists "$path/phy80211" || [ -d "$path/wireless" ]; then
+		return 1
+	fi
+
+	if exists "$path/device"; then
+		[ "$(cat "$path/type" 2>/dev/null)" = "$ARPHRD_ETHER" ]
+		return
+	fi
+
+	if [ -d "$path/bonding" ]; then
+		return 0
+	fi
+
+	grep -qE '^DEVTYPE=(bond|vlan)$' "$path/uevent" 2>/dev/null
+}
+
+collect() {
+	local path name
+
+	for path in /sys/class/net/*; do
+		name=${path##*/}
+
+		if [ "$name" = lo ]; then
+			continue
+		fi
+
+		if is_wanted "$path"; then
+			printf '%s\n' "$name"
+		fi
+	done
+}
+
+interfaces=$(
+	{
+		collect
+		printf '%s\n' "$ALWAYS_ALLOWED"
+	} | sort -u | paste -sd, -
+)
+
+current=$(sed -n 's/^allow-interfaces=//p' "$CONFIGURATION" | head -n 1)
+
+if [ "$current" = "$interfaces" ]; then
+	exit 0
+fi
+
+staged=$(mktemp "$CONFIGURATION.XXXXXX") || exit 1
+trap 'rm -f "$staged"' EXIT
+
+if grep -qE '^#?allow-interfaces=' "$CONFIGURATION"; then
+	awk -v value="allow-interfaces=$interfaces" '
+		/^#?allow-interfaces=/ {
+			if (!written) {
+				print value
+				written = 1
+			}
+			next
+		}
+		{ print }
+	' "$CONFIGURATION" > "$staged"
+elif grep -q '^\[server\]' "$CONFIGURATION"; then
+	awk -v value="allow-interfaces=$interfaces" '
+		{ print }
+		/^\[server\]/ && !written {
+			print value
+			written = 1
+		}
+	' "$CONFIGURATION" > "$staged"
+else
+	{
+		printf '[server]\n%s\n' "allow-interfaces=$interfaces"
+		cat "$CONFIGURATION"
+	} > "$staged"
+fi
+
+chmod --reference="$CONFIGURATION" "$staged"
+chown --reference="$CONFIGURATION" "$staged"
+mv "$staged" "$CONFIGURATION"
+trap - EXIT
+
+echo "Allowing mDNS on $interfaces"
