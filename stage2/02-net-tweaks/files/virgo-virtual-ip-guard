@@ -1,0 +1,72 @@
+#!/bin/bash
+
+set -o pipefail
+
+environment_file="/etc/default/virgo-virtual-ip"
+unit="virgo-virtual-ip.service"
+link_timeout=90
+probe_attempts=3
+
+# Another host answering is a settled answer: the address is theirs until an operator moves it, so the
+# unit is disabled and this node comes back as a standby rather than retrying every boot.
+stand_down() {
+	echo "$1"
+	systemctl disable "$unit"
+	exit 1
+}
+
+# Not knowing is not the same as knowing it is taken. The start fails so nothing is claimed, but the
+# unit stays enabled and tries again next boot.
+give_up() {
+	echo "$1"
+	exit 1
+}
+
+if [ ! -f "$environment_file" ]; then
+	give_up "$environment_file is missing; not claiming a virtual IP."
+fi
+
+. "$environment_file"
+
+if [ -z "$VIRTUAL_IP_ADDR" ] || [ -z "$VIRTUAL_IP_DEV" ]; then
+	give_up "$environment_file is incomplete; not claiming a virtual IP."
+fi
+
+if ip -4 -o addr show | grep -Fqw "$VIRTUAL_IP_ADDR"; then
+	exit 0
+fi
+
+# The bond is created with updelay=10000, so at boot the link can be present but not yet carrying
+# traffic. Probing then answers nothing, and treating that as "free" is how two nodes end up holding
+# the same address.
+waited=0
+while [ "$waited" -lt "$link_timeout" ]; do
+	if ip -o link show "$VIRTUAL_IP_DEV" 2>/dev/null | grep -q 'LOWER_UP'; then
+		break
+	fi
+
+	sleep 1
+	waited=$((waited + 1))
+done
+
+if ! ip -o link show "$VIRTUAL_IP_DEV" 2>/dev/null | grep -q 'LOWER_UP'; then
+	give_up "$VIRTUAL_IP_DEV did not come up within ${link_timeout}s; not claiming $VIRTUAL_IP_ADDR."
+fi
+
+attempt=1
+while [ "$attempt" -le "$probe_attempts" ]; do
+	arping -D -q -c 2 -w 3 -I "$VIRTUAL_IP_DEV" "$VIRTUAL_IP_ADDR"
+	status=$?
+
+	if [ "$status" -eq 0 ]; then
+		exit 0
+	fi
+
+	if [ "$status" -eq 1 ]; then
+		stand_down "$VIRTUAL_IP_ADDR is already held by another host; standing down."
+	fi
+
+	attempt=$((attempt + 1))
+done
+
+give_up "Could not determine whether $VIRTUAL_IP_ADDR is in use; not claiming it."
