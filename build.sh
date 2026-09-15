@@ -69,10 +69,7 @@ exec > >(tee "$WORK_DIR/build.log") 2>&1
 lb bootstrap
 lb chroot
 # Hook-installed packages must be retained in the installer manifest.
-python3 "$BASE_DIR/scripts/install-manifest.py" \
-    chroot.packages.install chroot/var/lib/virgo-build-packages chroot.packages.live \
-    chroot.packages.install
-rm -f chroot/var/lib/virgo-build-packages
+python3 "$BASE_DIR/scripts/install-manifest.py" chroot.packages.live chroot.packages.install
 lb installer
 # Left until after lb installer, which still needs working DNS inside the chroot.
 ln -sfn /run/NetworkManager/resolv.conf chroot/etc/resolv.conf

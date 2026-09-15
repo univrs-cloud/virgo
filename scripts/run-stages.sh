@@ -9,7 +9,6 @@ source "$BASE_DIR/build.env"
 source "$BASE_DIR/scripts/common"
 export ROOTFS_DIR="" DEBIAN_FRONTEND=noninteractive
 export LC_ALL=C LANG=C
-dpkg-query -W > /var/lib/virgo-build-packages
 shopt -s nullglob
 for stage in stage0 stage1 stage2; do
     for substage in "$BASE_DIR/$stage"/*/; do
