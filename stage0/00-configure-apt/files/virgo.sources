@@ -2,5 +2,5 @@ Types: deb
 URIs: https://packages.univrs.cloud/
 Suites: stable
 Components: main
-Architectures: arm64
+Architectures: amd64
 Signed-By: /usr/share/keyrings/virgo-packages-keyring.gpg

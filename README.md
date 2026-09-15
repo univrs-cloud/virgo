@@ -1,38 +1,32 @@
 # virgo
 
-Tool used to create virgoOS images.
+Tool used to create virgoOS installer images.
+
+Builds a Debian 13 Trixie hybrid ISO using live-build. Write the ISO to a USB
+stick, boot the server, and select **Install**. Debian Installer copies the
+prepared system to the selected drive and installs GRUB; no packages are
+downloaded or installed during the install. Drive selection and erase
+confirmation remain interactive.
+
+The ISO supports BIOS and UEFI boot with **Secure Boot disabled**. The bundled
+ZFS module is not signed by a key trusted by the server firmware.
 
 ## Dependencies
 
-virgoOS runs on Debian-based operating systems released after 2017, and we
-always advise you use the latest OS for security reasons.
+Build on an AMD64 machine or VM running Debian 13 with root access, internet
+access, and at least 30 GB of free space on a Linux filesystem.
 
-On other Linux distributions it may be possible to use the Docker build described
-below.
+The file `depends` contains a list of tools needed.  The format of this
+package is `<tool>[:<debian-package>]`, where an entry starting with `/` is
+checked as a file path rather than a command.
 
 To install the required dependencies for `virgo` you should run:
 
 ```bash
-apt install coreutils quilt parted qemu-user-binfmt debootstrap zerofree zip \
-dosfstools e2fsprogs libarchive-tools libcap2-bin grep rsync xz-utils file git curl bc \
-gpg pigz xxd arch-test bmap-tools kmod
+apt install $(cut -d: -f2 depends | sort -u)
 ```
 
-```bash
-wget https://ftp-master.debian.org/keys/archive-key-13.asc
-wget https://ftp-master.debian.org/keys/archive-key-13-security.asc
-mkdir -p /usr/share/keyrings/
-gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-13.asc
-gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-13-security.asc
-```
-
-The file `depends` contains a list of tools needed.  The format of this
-package is `<tool>[:<debian-package>]`.
-
-qemu is only used outside a native build environment, which is not supported. If
-you do build that way on a distribution whose `qemu-user` binaries are still
-dynamically linked, install `qemu-user-static` instead of `qemu-user-binfmt`, or
-the chroot will fail.
+`build.sh` checks them before building and prints anything missing.
 
 ## Getting started with building your images
 
@@ -40,7 +34,7 @@ Getting started is as simple as cloning this repository on your build machine. Y
 can do so with:
 
 ```bash
-git clone https://github.com/univrs-cloud/virgo.git
+git clone --branch amd64 https://github.com/univrs-cloud/virgo.git
 ```
 
 `--depth 1` can be added after `git clone` to create a shallow clone, only containing
@@ -53,6 +47,18 @@ running.
 After cloning the repository, you can move to the next step and start configuring
 your build.
 
+```bash
+sudo ./build.sh
+```
+
+Outputs are written to `deploy/`: the `.iso`, its SHA256 checksum, the installed
+package manifest, and the ZFS build information. The build log is in
+`work/live-build/build.log`.
+
+`./build.sh --prepare` writes the live-build configuration without building, so
+you can inspect `work/live-build/config` first. Run `./clean.sh` before
+rebuilding; the package cache is retained.
+
 ## Config
 
 Upon execution, `build.sh` will source the file `config` in the current
@@ -61,85 +67,23 @@ environment variables.
 
 The following environment variables are supported:
 
- * `IMG_NAME` (Default: `spica-$RELEASE-$ARCH`, for example: `spica-trixie-armhf`)
+ * `IMG_NAME` (Default: `virgo-trixie`)
 
-   The name of the image to build with the current stage directories. Use this
-   variable to set the root name of your OS, eg `IMG_NAME=Frobulator`.
-   Export files in stages may add suffixes to `IMG_NAME`.
+   The base name of the ISO to build. The release and architecture are fixed at
+   `trixie` and `amd64` by this branch.
 
- * `PI_GEN_RELEASE` (Default: `virgoOS Spica`)
-
-   The release name to use in `/etc/issue.txt`.
-
-* `RELEASE` (Default: `trixie`)
-
-   The release version to build images against. Valid values are any supported
-   Debian release. However, since different releases will have different sets of
-   packages available, you'll need to either modify your stages accordingly, or
-   checkout the appropriate branch. For example, if you'd like to build a
-   `bullseye` image, you should do so from the `bullseye` branch.
-
- * `APT_PROXY` (Default: unset)
-
-   If you require the use of an apt proxy, set it here.  This proxy setting
-   will not be included in the image, making it safe to use an `apt-cacher` or
-   similar package for development.
-
- * `TEMP_REPO` (Default: unset)
-
-   An additional temporary apt repo to be used during the build process. This
-   could be useful if you require pre-release software to be included in the
-   image. The variable should contain sources in [one-line-style format](https://manpages.debian.org/stable/apt/sources.list.5.en.html#ONE-LINE-STYLE_FORMAT).
-   "RELEASE" will be replaced with the RELEASE variable.
-
- * `BASE_DIR`  (Default: location of `build.sh`)
-
-   **CAUTION**: Currently, changing this value will probably break build.sh
-
-   Top-level directory for `virgo`.  Contains stage directories, build
-   scripts, and by default both work and deployment directories.
-
- * `WORK_DIR`  (Default: `$BASE_DIR/work`)
+ * `WORK_DIR`  (Default: `$BASE_DIR/work/live-build`)
 
    Directory in which `virgo` builds the target system.  This value can be
-   changed if you have a suitably large, fast storage location for stages to
-   be built and cached.  Note, `WORK_DIR` stores a complete copy of the target
-   system for each build stage, amounting to tens of gigabytes in the case of
-   Raspbian.
+   changed if you have a suitably large, fast storage location. Must be an
+   absolute path.
 
    **CAUTION**: If your working directory is on an NTFS partition you probably won't be able to build: make sure this is a proper Linux filesystem.
 
  * `DEPLOY_DIR`  (Default: `$BASE_DIR/deploy`)
 
-   Output directory for target system images and NOOBS bundles.
-
- * `DEPLOY_COMPRESSION` (Default: `zip`)
-
-   Set to:
-   * `none` to deploy the actual image (`.img`).
-   * `zip` to deploy a zipped image (`.zip`).
-   * `gz` to deploy a gzipped image (`.img.gz`).
-   * `xz` to deploy a xzipped image (`.img.xz`).
-
-
- * `DEPLOY_ZIP` (Deprecated)
-
-   This option has been deprecated in favor of `DEPLOY_COMPRESSION`.
-
-   If `DEPLOY_ZIP=0` is still present in your config file, the behavior is the
-   same as with `DEPLOY_COMPRESSION=none`.
-
- * `COMPRESSION_LEVEL` (Default: `6`)
-
-   Compression level to be used when using `zip`, `gz` or `xz` for
-   `DEPLOY_COMPRESSION`. From 0 to 9 (refer to the tool man page for more
-   information on this. Usually 0 is no compression but very fast, up to 9 with
-   the best compression but very slow ).
-
- * `USE_QEMU` (Default: `0`)
-
-   Setting to '1' enables the QEMU mode - creating an image that can be mounted via QEMU for an emulated
-   environment. These images include "-qemu" in the image file name.
+   Output directory for the finished ISO and its checksum. Must be an absolute
+   path.
 
  * `LOCALE_DEFAULT` (Default: 'en_US.UTF-8' )
 
@@ -165,7 +109,7 @@ The following environment variables are supported:
    keyboard-configuration` and look at the
    `keyboard-configuration/variant` value.
 
- * `TIMEZONE_DEFAULT` (Default: 'Europe/Bucharest' )
+ * `TIMEZONE_DEFAULT` (Default: 'Etc/UTC' )
 
    Default time zone.
 
@@ -174,20 +118,13 @@ The following environment variables are supported:
 
  * `FIRST_USER_NAME` (Default: `voyager`)
 
-   Username for the first user. This user only exists during the image creation process. Unless
-   `DISABLE_FIRST_BOOT_USER_RENAME` is set to `1`, this user will be renamed on the first boot with
-   a name chosen by the final user. This security feature is designed to prevent shipping images
-   with a default username and help prevent malicious actors from taking over your devices.
+   Username for the first user. The account is created during the image build
+   and ships on the installed system.
 
  * `FIRST_USER_PASS` (Default: `intergalactic`)
 
-   Password for the first user. If unset, the account is locked.
-
- * `DISABLE_FIRST_BOOT_USER_RENAME` (Default: `1`)
-
-   Disable the renaming of the first user during the first boot. This make it so `FIRST_USER_NAME`
-   stays activated. `FIRST_USER_PASS` must be set for this to work. Please be aware of the implied
-   security risk of defining a default username and password for your devices.
+   Password for the first user. If unset, the account is locked. The `root`
+   account is locked in all cases.
 
  * `PASSWORDLESS_SUDO` (Default: `0`)
 
@@ -196,10 +133,6 @@ The following environment variables are supported:
    this is a security risk and should only be enabled if you understand the
    implications. The user will still be able to use sudo with a password even
    when this is set to `0`.
-
- * `WPA_COUNTRY` (Default: unset)
-
-   Sets the default WLAN regulatory domain and unblocks WLAN interfaces. This should be a 2-letter ISO/IEC 3166 country Code, i.e. `GB`
 
  * `ENABLE_SSH` (Default: `1`)
 
@@ -217,32 +150,13 @@ The following environment variables are supported:
    public key authentication.  Note that if SSH is not enabled this will take
    effect when SSH becomes enabled.
 
- * `SETFCAP` (Default: unset)
-
-   * Setting to `1` will prevent virgoOS from dropping the "capabilities"
-   feature. Generating the root filesystem with capabilities enabled and running
-   it from a filesystem that does not support capabilities (like NFS) can cause
-   issues. Only enable this if you understand what it is.
-
- * `STAGE_LIST` (Default: `stage*`)
-
-    If set, then instead of working through the numeric stages in order, this list will be followed. For example setting to `"stage0 stage1 mystage stage2"` will run the contents of `mystage` before stage2. Note that quotes are needed around the list. An absolute or relative path can be given for stages outside the virgoOS directory.
-
- * `EXPORT_CONFIG_DIR` (Default: `$BASE_DIR/export-image`)
-
-    If set, use this directory path as the location of scripts to run when generating images. An absolute or relative path can be given for a location outside the virgoOS directory.
-
- * `ENABLE_CLOUD_INIT` (Default: `1`)
-
-    If set to `1`, cloud-init and netplan will be installed and configured. This will allow you to configure your system using cloud-init configuration files. The cloud-init configuration files should be placed in the bootfs or by editing the files in `stage2/04-cloud-init/files`. Cloud-init will be configured to read them on first boot.
-
 A simple example for building virgoOS:
 
 ```bash
 IMG_NAME='Spica'
 ```
 
-The config file can also be specified on the command line as an argument the `build.sh` or `build-docker.sh` scripts.
+The config file can also be specified on the command line as an argument the `build.sh` script.
 
 ```
 ./build.sh -c myconfig
@@ -252,15 +166,14 @@ This is parsed after `config` so can be used to override values set there.
 
 ## How the build process works
 
-The following process is followed to build images:
+`build.sh` generates a live-build configuration, then runs `lb bootstrap`,
+`lb chroot`, `lb installer` and `lb binary`. The stage directories are copied
+into that configuration and run inside the chroot by a live-build hook, so
+everything below happens in one chroot rather than one per stage.
 
- * Iterate through all of the stage directories in alphanumeric order
+The following process is followed by that hook:
 
- * Bypass a stage directory if it contains a file called
-   "SKIP"
-
- * Run the script `prerun.sh` which is generally just used to copy the build
-   directory between stages.
+ * Iterate through the stage directories `stage0`, `stage1` and `stage2` in order
 
  * In each stage directory iterate through each subdirectory and then run each of the
    install scripts it contains, again in alphanumeric order. **These need to be named
@@ -268,13 +181,15 @@ The following process is followed to build images:
    There are a number of different files and directories which can be used to
    control different parts of the build process:
 
-     - **00-run.sh** - A unix shell script. Needs to be made executable for it to run.
+     - **00-run.sh** - A unix shell script.
 
-     - **00-run-chroot.sh** - A unix shell script which will be run in the chroot
-       of the image build directory. Needs to be made executable for it to run.
+     - **00-run-chroot.sh** - A unix shell script. Retained for compatibility
+       with the `arm64` branch; the build already runs inside the chroot, so it
+       behaves the same as `00-run.sh`.
 
      - **00-debconf** - Contents of this file are passed to debconf-set-selections
-       to configure things like locale, etc.
+       to configure things like locale, etc. `${LOCALE_DEFAULT}`,
+       `${KEYBOARD_KEYMAP}` and `${KEYBOARD_LAYOUT}` are substituted.
 
      - **00-packages** - A list of packages to install. Can have more than one, space
        separated, per line.
@@ -282,174 +197,66 @@ The following process is followed to build images:
      - **00-packages-nr** - As 00-packages, except these will be installed using
        the `--no-install-recommends -y` parameters to apt-get.
 
-     - **00-patches** - A directory containing patch files to be applied, using quilt.
-       If a file named 'EDIT' is present in the directory, the build process will
-       be interrupted with a bash session, allowing an opportunity to create/revise
-       the patches.
+     - **00-patches** - A directory containing patch files to be applied, listed
+       in a `series` file and applied with `patch -p2` against `/`.
 
-  * If the stage directory contains files called "EXPORT_NOOBS" or "EXPORT_IMAGE" then
-    add this stage to a list of images to generate
+ * Snapshot the apt sources and install `finish-install.sh`, which Debian
+   Installer runs on the target through the preseed's `late_command`
 
-  * Generate the images for any stages that have specified them
+ * Strip the machine identity and logs so every installed node generates its own
 
 It is recommended to examine build.sh for finer details.
 
-
-## Docker Build
-
-Docker can be used to perform the build inside a container. This partially isolates
-the build from the host system, and allows using the script on non-debian based
-systems (e.g. Fedora Linux). The isolation is not complete due to the need to use
-some kernel level services for arm emulation (binfmt) and loop devices (losetup).
-
-To build:
-
-```bash
-vi config         # Edit your config file. See above.
-./build-docker.sh
-```
-
-If everything goes well, your finished image will be in the `deploy/` folder.
-You can then remove the build container with `docker rm -v virgo_work`
-
-If you encounter errors during the build, you can edit the corresponding scripts, and
-continue:
-
-```bash
-CONTINUE=1 ./build-docker.sh
-```
-
-To examine the container after a failure you can enter a shell within it using:
-
-```bash
-sudo docker run -it --privileged --volumes-from=virgo_work virgo /bin/bash
-```
-
-After successful build, the build container is by default removed. This may be undesired when making incremental changes to a customized build. To prevent the build script from remove the container add
-
-```bash
-PRESERVE_CONTAINER=1 ./build-docker.sh
-```
-
-There is a possibility that even when running from a docker container, the
-installation of `qemu-user-static` will silently fail when building the image
-because `binfmt-support` _must be enabled on the underlying kernel_. An easy
-fix is to ensure `binfmt-support` is installed on the host machine before
-starting the `./build-docker.sh` script (or using your own docker build
-solution).
-
-### Passing arguments to Docker
-
-When the docker image is run various required command line arguments are provided.  For example the system mounts the `/dev` directory to the `/dev` directory within the docker container.  If other arguments are required they may be specified in the VIRGO_DOCKER_OPTS environment variable.  For example setting `VIRGO_DOCKER_OPTS="--add-host foo:192.168.0.23"` will add '192.168.0.23   foo' to the `/etc/hosts` file in the container.  The `--name`
-and `--privileged` options are already set by the script and should not be redefined.
-
 ## Stage Anatomy
 
-### Raspbian Stage Overview
+### Stage Overview
 
-The build of Raspbian is divided up into several stages for logical clarity
+The build is divided up into several stages for logical clarity
 and modularity.  This causes some initial complexity, but it simplifies
 maintenance and allows for more easy customization.
 
- - **Stage 0** - bootstrap.  The primary purpose of this stage is to create a
-   usable filesystem.  This is accomplished largely through the use of
-   `debootstrap`, which creates a minimal filesystem suitable for use as a
-   base.tgz on Debian systems.  This stage also configures apt settings and
-   installs `raspberrypi-bootloader` which is missed by debootstrap.  The
-   minimal core is installed but not configured. As a result, this stage will not boot.
+ - **Stage 0** - apt configuration.  Adds the univrs package repository and the
+   ZFS pin on top of the base system live-build has already bootstrapped, and
+   installs the kernel headers, firmware and microcode.
 
- - **Stage 1** - truly minimal system.  This stage makes the system bootable by
-   installing system files like `/etc/fstab`, configures the bootloader, makes
-   the network operable, and installs packages like raspi-config.  At this
-   stage the system should boot to a local console from which you have the
-   means to perform basic tasks needed to configure and install the system.
+ - **Stage 1** - truly minimal system.  This stage configures GRUB defaults,
+   creates the first user, locks `root`, and tunes the journal.  Debian
+   Installer writes `/etc/fstab` and installs the bootloader, so neither is
+   built here.
 
- - **Stage 2** - lite system.  This stage produces the virgoOS Lite image.
-   Stage 2 installs some optimized memory functions, sets timezone and charmap
-   defaults, installs fake-hwclock and ntp, wireless LAN and bluetooth support,
-   dphys-swapfile, and other basics for managing the hardware.  It also
-   creates necessary groups and gives the user access to sudo and the
-   standard console hardware permission groups.
+ - **Stage 2** - the full system.  Stage 2 sets timezone and charmap
+   defaults, configures NetworkManager, the firewall and mDNS, installs ZFS,
+   Samba, Docker, Node.js and the Virgo packages, and creates necessary groups
+   and gives the user access to sudo and the standard console hardware
+   permission groups.
 
-   Note: virgoOS Lite contains a number of tools for development,
+   Note: the image contains a number of tools for development,
    including `Python`, `Lua` and the `build-essential` package. If you are
    creating an image to deploy in products, be sure to remove extraneous development
    tools before deployment.
 
-### Stage specification
-
-If you wish to build up to a specified stage (such as building up to stage 2
-for a lite system), place an empty file named `SKIP` in each of the `./stage`
-directories you wish not to include.
-
-Then add an empty file named `SKIP_IMAGES` to `./stage4` and `./stage5` (if building up to stage 2) or
-to `./stage2` (if building a minimal system).
-
-```bash
-# Example for building a lite system
-echo "IMG_NAME='spica'" > config
-touch ./stage3/SKIP ./stage4/SKIP ./stage5/SKIP
-touch ./stage4/SKIP_IMAGES ./stage5/SKIP_IMAGES
-sudo ./build.sh  # or ./build-docker.sh
-```
-
-If you wish to build further configurations upon (for example) the lite
-system, you can also delete the contents of `./stage3` and `./stage4` and
-replace with your own contents in the same format.
-
-
-## Skipping stages to speed up development
-
-If you're working on a specific stage the recommended development process is as
-follows:
-
- * Add a file called SKIP_IMAGES into the directories containing EXPORT_* files
-   (currently stage2, stage4 and stage5)
- * Add SKIP files to the stages you don't want to build. For example, if you're
-   basing your image on the lite image you would add these to stages 3, 4 and 5.
- * Run build.sh to build all stages
- * Add SKIP files to the earlier successfully built stages
- * Modify the last stage
- * Rebuild just the last stage using `sudo CLEAN=1 ./build.sh` (or, for docker builds
-   `PRESERVE_CONTAINER=1 CONTINUE=1 CLEAN=1 ./build-docker.sh`)
- * Once you're happy with the image you can remove the SKIP_IMAGES files and
-   export your image to test
+   The last two substages are ordering-sensitive: `10-installer` snapshots the
+   apt sources before live-build rewrites them, and `99-cleanup` must run after
+   every other substage.
 
 # Troubleshooting
 
-## `64 Bit Systems`
-A 64 bit image can be generated from the `arm64` branch in this repository. Just
-replace the command from [this section](#getting-started-with-building-your-images)
-by the one below, and follow the rest of the documentation:
+## `Existing build found`
+
+`build.sh` refuses to build over a previous run. Run `./clean.sh` first. The
+downloaded package cache survives, so a rebuild is not a full re-download.
+
+## `Secure Boot`
+
+The ZFS module is built by DKMS during the image build and is not signed by a
+key the firmware trusts. Disable Secure Boot in the server firmware before
+installing.
+
+## `ARM64 systems`
+
+An ARM64 image for Raspberry Pi hardware is generated from the `arm64` branch in
+this repository, which uses a different build system:
+
 ```bash
 git clone --branch arm64 https://github.com/univrs-cloud/virgo.git
 ```
-
-## `binfmt_misc`
-
-Linux is able to execute binaries from other architectures, meaning that it should be
-possible to make use of `virgo` on an x86_64 system, even though it will be running
-ARM binaries. This requires support from the [`binfmt_misc`](https://en.wikipedia.org/wiki/Binfmt_misc)
-kernel module.
-
-You may see one of the following errors:
-
-```
-update-binfmts: warning: Couldn't load the binfmt_misc module.
-```
-```
-W: Failure trying to run: chroot "/virgo/work/test/stage0/rootfs" /bin/true
-and/or
-chroot: failed to run command '/bin/true': Exec format error
-```
-
-To resolve this, ensure that the following files are available (install them if necessary):
-
-```
-/lib/modules/$(uname -r)/kernel/fs/binfmt_misc.ko
-/usr/bin/qemu-aarch64-static
-```
-
-You may also need to load the module by hand - run `modprobe binfmt_misc`.
-
-If you are using WSL to build you may have to enable the service `sudo update-binfmts --enable`

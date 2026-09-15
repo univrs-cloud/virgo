@@ -1,6 +1,4 @@
-deploy/*
-work/*
-postrun.sh
-.pc
-*-pc
+deploy/
+work/
 .vscode/
+__pycache__/

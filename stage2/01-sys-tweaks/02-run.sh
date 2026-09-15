@@ -1,5 +1,6 @@
 #!/bin/bash -e
-
-# Install rpi-swap drop-in to configure zram-only swap (no backing file)
-install -d "${ROOTFS_DIR}/etc/rpi/swap.conf.d"
-install -m 644 files/90-zram-only.conf "${ROOTFS_DIR}/etc/rpi/swap.conf.d/90-zram-only.conf"
+cat > /etc/systemd/zram-generator.conf <<'EOF'
+[zram0]
+zram-size = min(ram / 2, 4096)
+swap-priority = 100
+EOF

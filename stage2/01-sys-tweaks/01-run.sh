@@ -8,9 +8,12 @@ if [ -n "${PUBKEY_SSH_FIRST_USER}" ]; then
 fi
 
 if [ "${PUBKEY_ONLY_SSH}" = "1" ]; then
-	sed -i -Ee 's/^#?[[:blank:]]*PubkeyAuthentication[[:blank:]]*no[[:blank:]]*$/PubkeyAuthentication yes/
-s/^#?[[:blank:]]*PasswordAuthentication[[:blank:]]*yes[[:blank:]]*$/PasswordAuthentication no/' "${ROOTFS_DIR}"/etc/ssh/sshd_config
+	install -v -d "${ROOTFS_DIR}/etc/ssh/sshd_config.d"
+	printf 'PubkeyAuthentication yes\nPasswordAuthentication no\nKbdInteractiveAuthentication no\n' \
+		> "${ROOTFS_DIR}/etc/ssh/sshd_config.d/10-virgo.conf"
 fi
+
+install -v -m 644 -D files/ssh-regenerate-host-keys.conf "${ROOTFS_DIR}/etc/systemd/system/ssh.service.d/10-host-keys.conf"
 
 on_chroot << EOF
 if [ "${ENABLE_SSH}" == "1" ]; then
@@ -20,15 +23,7 @@ else
 fi
 EOF
 
-if [ "${USE_QEMU}" = "1" ]; then
-	echo "enter QEMU mode"
-	install -m 644 files/90-qemu.rules "${ROOTFS_DIR}/etc/udev/rules.d/"
-	echo "leaving QEMU mode"
-fi
-
-
 on_chroot <<- EOF
-	systemctl enable rpi-resize
 
 	for GRP in input spi i2c gpio; do
 		groupadd -f -r "\$GRP"
@@ -39,20 +34,15 @@ on_chroot <<- EOF
 EOF
 
 if [ "${PASSWORDLESS_SUDO}" = "1" ]; then
-	on_chroot <<- EOF
-		SUDO_USER="${FIRST_USER_NAME}" raspi-config nonint do_sudo_pass 1
-	EOF
+    printf '%s ALL=(ALL:ALL) NOPASSWD: ALL\n' "$FIRST_USER_NAME" > /etc/sudoers.d/010-virgo
+    chmod 0440 /etc/sudoers.d/010-virgo
+    visudo -cf /etc/sudoers.d/010-virgo
 fi
 
 on_chroot << EOF
 setupcon --force --save-only -v
 EOF
 
-on_chroot << EOF
-usermod --pass='*' root
-EOF
-
-rm -f "${ROOTFS_DIR}/etc/ssh/"ssh_host_*_key*
 
 sed -i 's/^FONTFACE=.*/FONTFACE=""/;s/^FONTSIZE=.*/FONTSIZE=""/' "${ROOTFS_DIR}/etc/default/console-setup"
 sed -i "s/PLACEHOLDER//" "${ROOTFS_DIR}/etc/default/keyboard"

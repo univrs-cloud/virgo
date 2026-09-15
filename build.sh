@@ -1,359 +1,81 @@
-#!/bin/bash -e
-
-# shellcheck disable=SC2119
-run_sub_stage()
-{
-	log "Begin ${SUB_STAGE_DIR}"
-	pushd "${SUB_STAGE_DIR}" > /dev/null
-	for i in {00..99}; do
-		if [ -f "${i}-debconf" ]; then
-			log "Begin ${SUB_STAGE_DIR}/${i}-debconf"
-			on_chroot << EOF
-debconf-set-selections <<SELEOF
-$(cat "${i}-debconf")
-SELEOF
-EOF
-
-			log "End ${SUB_STAGE_DIR}/${i}-debconf"
-		fi
-		if [ -f "${i}-packages-nr" ]; then
-			log "Begin ${SUB_STAGE_DIR}/${i}-packages-nr"
-			PACKAGES="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < "${i}-packages-nr")"
-			if [ -n "$PACKAGES" ]; then
-				on_chroot << EOF
-apt-get -o Acquire::Retries=3 install --no-install-recommends -y $PACKAGES
-EOF
-			fi
-			log "End ${SUB_STAGE_DIR}/${i}-packages-nr"
-		fi
-		if [ -f "${i}-packages" ]; then
-			log "Begin ${SUB_STAGE_DIR}/${i}-packages"
-			PACKAGES="$(sed -f "${SCRIPT_DIR}/remove-comments.sed" < "${i}-packages")"
-			if [ -n "$PACKAGES" ]; then
-				on_chroot << EOF
-apt-get -o Acquire::Retries=3 install -y $PACKAGES
-EOF
-			fi
-			log "End ${SUB_STAGE_DIR}/${i}-packages"
-		fi
-		if [ -d "${i}-patches" ]; then
-			log "Begin ${SUB_STAGE_DIR}/${i}-patches"
-			pushd "${STAGE_WORK_DIR}" > /dev/null
-			if [ "${CLEAN}" = "1" ]; then
-				rm -rf .pc
-				rm -rf ./*-pc
-			fi
-			QUILT_PATCHES="${SUB_STAGE_DIR}/${i}-patches"
-			SUB_STAGE_QUILT_PATCH_DIR="$(basename "$SUB_STAGE_DIR")-pc"
-			mkdir -p "$SUB_STAGE_QUILT_PATCH_DIR"
-			ln -snf "$SUB_STAGE_QUILT_PATCH_DIR" .pc
-			quilt upgrade
-			if [ -e "${SUB_STAGE_DIR}/${i}-patches/EDIT" ]; then
-				echo "Dropping into bash to edit patches..."
-				bash
-			fi
-			RC=0
-			quilt push -a || RC=$?
-			case "$RC" in
-				0|2)
-					;;
-				*)
-					false
-					;;
-			esac
-			popd > /dev/null
-			log "End ${SUB_STAGE_DIR}/${i}-patches"
-		fi
-		if [ -x ${i}-run.sh ]; then
-			log "Begin ${SUB_STAGE_DIR}/${i}-run.sh"
-			./${i}-run.sh
-			log "End ${SUB_STAGE_DIR}/${i}-run.sh"
-		elif [ -f ${i}-run.sh ]; then
-			log "Skip ${SUB_STAGE_DIR}/${i}-run.sh (not executable)"
-		fi
-		if [ -f ${i}-run-chroot.sh ]; then
-			log "Begin ${SUB_STAGE_DIR}/${i}-run-chroot.sh"
-			on_chroot < ${i}-run-chroot.sh
-			log "End ${SUB_STAGE_DIR}/${i}-run-chroot.sh"
-		fi
-	done
-	popd > /dev/null
-	log "End ${SUB_STAGE_DIR}"
-}
-
-
-run_stage(){
-	log "Begin ${STAGE_DIR}"
-	STAGE="$(basename "${STAGE_DIR}")"
-
-	pushd "${STAGE_DIR}" > /dev/null
-
-	STAGE_WORK_DIR="${WORK_DIR}/${STAGE}"
-	ROOTFS_DIR="${STAGE_WORK_DIR}"/rootfs
-
-	unmount "${WORK_DIR}/${STAGE}"
-
-	if [ ! -f SKIP_IMAGES ]; then
-		if [ -f "${STAGE_DIR}/EXPORT_IMAGE" ]; then
-			EXPORT_DIRS="${EXPORT_DIRS} ${STAGE_DIR}"
-		fi
-	fi
-	if [ ! -f SKIP ]; then
-		if [ "${CLEAN}" = "1" ]; then
-			if [ -d "${ROOTFS_DIR}" ]; then
-				rm -rf "${ROOTFS_DIR}"
-			fi
-		fi
-		if [ -x prerun.sh ]; then
-			log "Begin ${STAGE_DIR}/prerun.sh"
-			./prerun.sh
-			log "End ${STAGE_DIR}/prerun.sh"
-		fi
-		for SUB_STAGE_DIR in "${STAGE_DIR}"/*; do
-			if [ -d "${SUB_STAGE_DIR}" ] && [ ! -f "${SUB_STAGE_DIR}/SKIP" ]; then
-				run_sub_stage
-			fi
-		done
-	fi
-
-	unmount "${WORK_DIR}/${STAGE}"
-
-	PREV_STAGE="${STAGE}"
-	PREV_STAGE_DIR="${STAGE_DIR}"
-	PREV_ROOTFS_DIR="${ROOTFS_DIR}"
-	popd > /dev/null
-	log "End ${STAGE_DIR}"
-}
-
-term() {
-	if [ "$?" -ne 0 ]; then
-		log "Build failed"
-	else
-		log "Build finished"
-	fi
-	unmount "${STAGE_WORK_DIR}"
-	if [ "$STAGE" = "export-image" ]; then
-		for img in "${STAGE_WORK_DIR}/"*.img; do
-			unmount_image "$img"
-		done
-	fi
-}
-
-if [ "$(id -u)" != "0" ]; then
-	echo "Please run as root" 1>&2
-	exit 1
+#!/bin/bash
+set -euo pipefail
+BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$BASE_DIR/scripts/build-config.sh"
+load_build_config "$@"
+if [[ "$PREPARE_ONLY" != 1 ]]; then
+    [[ "$(uname -s)" == Linux && "$(uname -m)" == x86_64 && "$EUID" == 0 ]] || {
+        echo "Build on AMD64 Linux as root." >&2
+        exit 1
+    }
+    source "$BASE_DIR/scripts/dependencies_check"
+    dependencies_check "$BASE_DIR/depends"
+else
+    command -v lb >/dev/null || { echo "Install live-build (see README.md)." >&2; exit 1; }
 fi
-
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-if [[ $BASE_DIR = *" "* ]]; then
-	echo "There is a space in the base path of virgo"
-	echo "This is not a valid setup supported by debootstrap."
-	echo "Please remove the spaces, or move virgo directory to a base path without spaces" 1>&2
-	exit 1
+mkdir -p "$WORK_DIR" "$DEPLOY_DIR"
+cd "$WORK_DIR"
+if [[ -f .build/bootstrap || -d chroot ]]; then
+    echo "Existing build found. Run ./clean.sh before rebuilding changed stages." >&2
+    exit 1
 fi
-
-export BASE_DIR
-
-if [ -f config ]; then
-	# shellcheck disable=SC1091
-	source config
+if [[ -e config && ! -f .virgo-live-build ]]; then
+    echo "Refusing to replace an unmanaged config in $WORK_DIR" >&2; exit 1
 fi
-
-while getopts "c:" flag
-do
-	case "$flag" in
-		c)
-			EXTRA_CONFIG="$OPTARG"
-			# shellcheck disable=SC1090
-			source "$EXTRA_CONFIG"
-			;;
-		*)
-			;;
-	esac
-done
-
-export PI_GEN=${PI_GEN:-virgo}
-export PI_GEN_REPO=${PI_GEN_REPO:-https://univrs.cloud}
-export PI_GEN_RELEASE=${PI_GEN_RELEASE:-virgoOS Spica}
-
-export ARCH=arm64
-export RELEASE=${RELEASE:-trixie} # Don't forget to update stage0/prerun.sh
-export IMG_NAME="${IMG_NAME:-spica-$RELEASE-$ARCH}"
-
-export USE_QEMU="${USE_QEMU:-0}"
-export IMG_DATE="${IMG_DATE:-"$(date +%Y-%m-%d)"}"
-export IMG_FILENAME="${IMG_FILENAME:-"${IMG_DATE}-${IMG_NAME}"}"
-export ARCHIVE_FILENAME="${ARCHIVE_FILENAME:-"image_${IMG_DATE}-${IMG_NAME}"}"
-
-export SCRIPT_DIR="${BASE_DIR}/scripts"
-export WORK_DIR="${WORK_DIR:-"${BASE_DIR}/work/${IMG_NAME}"}"
-export DEPLOY_DIR=${DEPLOY_DIR:-"${BASE_DIR}/deploy"}
-
-# DEPLOY_ZIP was deprecated in favor of DEPLOY_COMPRESSION
-# This preserve the old behavior with DEPLOY_ZIP=0 where no archive was created
-if [ -z "${DEPLOY_COMPRESSION}" ] && [ "${DEPLOY_ZIP:-1}" = "0" ]; then
-	echo "DEPLOY_ZIP has been deprecated in favor of DEPLOY_COMPRESSION"
-	echo "Similar behavior to DEPLOY_ZIP=0 can be obtained with DEPLOY_COMPRESSION=none"
-	echo "Please update your config file"
-	DEPLOY_COMPRESSION=none
+touch .virgo-live-build
+rm -rf config
+rm -f .build/config
+lb config --ignore-system-defaults \
+    --mode debian --distribution trixie --architecture amd64 \
+    --binary-image iso-hybrid --image-name "$IMG_NAME" \
+    --archive-areas "main contrib non-free non-free-firmware" \
+    --backports true --security true --updates true \
+    --debian-installer live --debian-installer-distribution trixie \
+    --debian-installer-gui false \
+    --bootloaders "syslinux grub-efi" --uefi-secure-boot disable \
+    --linux-flavours amd64 --linux-packages linux-image \
+    --firmware-chroot false --firmware-binary true \
+    --apt-recommends true --apt-source-archives false \
+    --cache true --cache-packages true --cache-stages bootstrap \
+    --chroot-filesystem squashfs --checksums sha256 --source false \
+    --iso-volume VIRGO_TRIXIE_AMD64 --iso-publisher "univrs.cloud" \
+    --bootappend-live "boot=live components hostname=$TARGET_HOSTNAME locales=$LOCALE_DEFAULT keyboard-layouts=$KEYBOARD_KEYMAP live-config.nocomponents=user-setup,sudo,ssh,ifupdown" \
+    --bootappend-install "priority=high preseed/file=/cdrom/install/preseed.cfg"
+mkdir -p config/virgo/scripts config/hooks/live config/package-lists \
+    config/includes.installer config/includes.chroot/etc
+cp -R "$BASE_DIR/stage0" "$BASE_DIR/stage1" "$BASE_DIR/stage2" config/virgo/
+cp "$BASE_DIR/scripts/"{common,run-stages.sh} config/virgo/scripts/
+write_build_environment > config/virgo/build.env
+chmod 600 config/virgo/build.env
+cp "$BASE_DIR/live-build/installer.preseed" config/includes.installer/preseed.cfg
+printf 'd-i time/zone string %s\n' "$TIMEZONE_DEFAULT" >> config/includes.installer/preseed.cfg
+printf '%s\n' "$TARGET_HOSTNAME" > config/includes.chroot/etc/hostname
+printf '127.0.0.1 localhost\n127.0.1.1 %s\n::1 localhost ip6-localhost ip6-loopback\n' \
+    "$TARGET_HOSTNAME" > config/includes.chroot/etc/hosts
+cp "$BASE_DIR/live-build/00-virgo.hook.chroot" config/hooks/live/
+printf '%s\n' ca-certificates curl gnupg gettext-base patch > config/package-lists/build.list.chroot
+if [[ "$PREPARE_ONLY" == 1 ]]; then
+    echo "Prepared live-build configuration in $WORK_DIR/config"
+    exit 0
 fi
-export DEPLOY_COMPRESSION=${DEPLOY_COMPRESSION:-zip}
-export COMPRESSION_LEVEL=${COMPRESSION_LEVEL:-6}
-export LOG_FILE="${WORK_DIR}/build.log"
-
-export TARGET_HOSTNAME=${TARGET_HOSTNAME:-m87}
-
-export FIRST_USER_NAME=${FIRST_USER_NAME:-virgo}
-export FIRST_USER_PASS
-export DISABLE_FIRST_BOOT_USER_RENAME=${DISABLE_FIRST_BOOT_USER_RENAME:-0}
-export PASSWORDLESS_SUDO="${PASSWORDLESS_SUDO:-0}"
-export WPA_COUNTRY
-export ENABLE_SSH="${ENABLE_SSH:-0}"
-export PUBKEY_ONLY_SSH="${PUBKEY_ONLY_SSH:-0}"
-
-export LOCALE_DEFAULT="${LOCALE_DEFAULT:-en_GB.UTF-8}"
-
-export KEYBOARD_KEYMAP="${KEYBOARD_KEYMAP:-gb}"
-export KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-English (UK)}"
-
-export TIMEZONE_DEFAULT="${TIMEZONE_DEFAULT:-Europe/London}"
-
-export GIT_HASH=${GIT_HASH:-"$(git rev-parse HEAD)"}
-
-export PUBKEY_SSH_FIRST_USER
-
-export CLEAN
-export APT_PROXY
-export TEMP_REPO
-
-export STAGE
-export STAGE_DIR
-export STAGE_WORK_DIR
-export PREV_STAGE
-export PREV_STAGE_DIR
-export ROOTFS_DIR
-export PREV_ROOTFS_DIR
-export IMG_SUFFIX
-export NOOBS_NAME
-export NOOBS_DESCRIPTION
-export EXPORT_DIR
-export EXPORT_ROOTFS_DIR
-
-export QUILT_PATCHES
-export QUILT_NO_DIFF_INDEX=1
-export QUILT_NO_DIFF_TIMESTAMPS=1
-export QUILT_REFRESH_ARGS="-p ab"
-
-export ENABLE_CLOUD_INIT=${ENABLE_CLOUD_INIT:-1}
-
-# shellcheck source=scripts/common
-source "${SCRIPT_DIR}/common"
-# shellcheck source=scripts/dependencies_check
-source "${SCRIPT_DIR}/dependencies_check"
-
-if [ "$SETFCAP" != "1" ]; then
-	export CAPSH_ARG="--drop=cap_setfcap"
-fi
-
-mkdir -p "${WORK_DIR}"
-trap term EXIT INT TERM
-
-dependencies_check "${BASE_DIR}/depends"
-
-
-PAGESIZE=$(getconf PAGESIZE)
-if [ "$ARCH" == "armhf" ] && [ "$PAGESIZE" != "4096" ]; then
-	echo
-	echo "ERROR: Building an $ARCH image requires a kernel with a 4k page size (current: $PAGESIZE)"
-	echo "On virgoOS (64-bit), you can switch to a suitable kernel by adding the following to /boot/firmware/config.txt and rebooting:"
-	echo
-	echo "kernel=kernel8.img"
-	echo "initramfs initramfs8 followkernel"
-	echo
-	exit 1
-fi
-
-echo "Checking native $ARCH executable support..."
-if ! arch-test -n "$ARCH"; then
-	echo "WARNING: Only a native build environment is supported. Checking emulated support..."
-	if ! arch-test "$ARCH"; then
-		echo "No fallback mechanism found. Ensure your OS has binfmt_misc support enabled and configured."
-		exit 1
-	fi
-fi
-
-#check username is valid
-if [[ ! "$FIRST_USER_NAME" =~ ^[a-z][-a-z0-9_]*$ ]]; then
-	echo "Invalid FIRST_USER_NAME: $FIRST_USER_NAME"
-	exit 1
-fi
-
-if [[ "$DISABLE_FIRST_BOOT_USER_RENAME" == "1" ]] && [ -z "${FIRST_USER_PASS}" ]; then
-	echo "To disable user rename on first boot, FIRST_USER_PASS needs to be set"
-	echo "Not setting FIRST_USER_PASS makes your system vulnerable and open to cyberattacks"
-	exit 1
-fi
-
-if [[ "$DISABLE_FIRST_BOOT_USER_RENAME" == "1" ]]; then
-	echo "User rename on the first boot is disabled"
-	echo "Be advised of the security risks linked to shipping a device with default username/password set."
-fi
-
-if [[ -n "${APT_PROXY}" ]] && ! curl --silent "${APT_PROXY}" >/dev/null ; then
-	echo "Could not reach APT_PROXY server: ${APT_PROXY}"
-	exit 1
-fi
-
-if [[ -n "${WPA_PASSWORD}" && ${#WPA_PASSWORD} -lt 8 || ${#WPA_PASSWORD} -gt 63  ]] ; then
-	echo "WPA_PASSWORD" must be between 8 and 63 characters
-	exit 1
-fi
-
-if [[ "${PUBKEY_ONLY_SSH}" = "1" && -z "${PUBKEY_SSH_FIRST_USER}" ]]; then
-	echo "Must set 'PUBKEY_SSH_FIRST_USER' to a valid SSH public key if using PUBKEY_ONLY_SSH"
-	exit 1
-fi
-
-log "Begin ${BASE_DIR}"
-
-STAGE_LIST=${STAGE_LIST:-${BASE_DIR}/stage*}
-export STAGE_LIST
-
-EXPORT_CONFIG_DIR=$(realpath "${EXPORT_CONFIG_DIR:-"${BASE_DIR}/export-image"}")
-if [ ! -d "${EXPORT_CONFIG_DIR}" ]; then
-	echo "EXPORT_CONFIG_DIR invalid: ${EXPORT_CONFIG_DIR} does not exist"
-	exit 1
-fi
-export EXPORT_CONFIG_DIR
-
-for STAGE_DIR in $STAGE_LIST; do
-	STAGE_DIR=$(realpath "${STAGE_DIR}")
-	run_stage
-done
-
-CLEAN=1
-for EXPORT_DIR in ${EXPORT_DIRS}; do
-	STAGE_DIR=${EXPORT_CONFIG_DIR}
-	# shellcheck source=/dev/null
-	source "${EXPORT_DIR}/EXPORT_IMAGE"
-	EXPORT_ROOTFS_DIR=${WORK_DIR}/$(basename "${EXPORT_DIR}")/rootfs
-	run_stage
-	if [ "${USE_QEMU}" != "1" ]; then
-		if [ -e "${EXPORT_DIR}/EXPORT_NOOBS" ]; then
-			# shellcheck source=/dev/null
-			source "${EXPORT_DIR}/EXPORT_NOOBS"
-			STAGE_DIR="${BASE_DIR}/export-noobs"
-			run_stage
-		fi
-	fi
-done
-
-if [ -x "${BASE_DIR}/postrun.sh" ]; then
-	log "Begin postrun.sh"
-	cd "${BASE_DIR}"
-	./postrun.sh
-	log "End postrun.sh"
-fi
-
-log "End ${BASE_DIR}"
+exec > >(tee "$WORK_DIR/build.log") 2>&1
+lb bootstrap
+lb chroot
+# Hook-installed packages must be retained in the installer manifest.
+python3 "$BASE_DIR/scripts/install-manifest.py" \
+    chroot.packages.install chroot/var/lib/virgo-build-packages chroot.packages.live \
+    chroot.packages.install
+rm -f chroot/var/lib/virgo-build-packages
+lb installer
+# Left until after lb installer, which still needs working DNS inside the chroot.
+ln -sfn /run/NetworkManager/resolv.conf chroot/etc/resolv.conf
+lb binary
+shopt -s nullglob
+images=("$IMG_NAME"*.iso)
+[[ ${#images[@]} -eq 1 ]] || { echo "Expected exactly one ISO." >&2; exit 1; }
+install -m 644 "${images[0]}" "$DEPLOY_DIR/"
+install -m 644 chroot.packages.install "$DEPLOY_DIR/$IMG_NAME.packages"
+install -m 644 chroot/usr/share/virgo/zfs-build.txt "$DEPLOY_DIR/$IMG_NAME.zfs-build.txt"
+cd "$DEPLOY_DIR"
+sha256sum "$(basename "${images[0]}")" > "$(basename "${images[0]}").sha256"
+echo "Installer ISO: $DEPLOY_DIR/$(basename "${images[0]}")"

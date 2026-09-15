@@ -1,0 +1,3 @@
+#!/bin/bash
+set -euo pipefail
+exec bash /live-build/config/virgo/scripts/run-stages.sh

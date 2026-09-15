@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-install -v -d "${ROOTFS_DIR}/usr/lib/aarch64-linux-gnu/udisks2/modules"
-install -v -m 600 files/empty "${ROOTFS_DIR}/usr/lib/aarch64-linux-gnu/udisks2/modules/"
+install -v -d "${ROOTFS_DIR}/usr/lib/x86_64-linux-gnu/udisks2/modules"
+install -v -m 600 files/empty "${ROOTFS_DIR}/usr/lib/x86_64-linux-gnu/udisks2/modules/"
 
 install -v -m 644 files/zfs.conf "${ROOTFS_DIR}/etc/modprobe.d/"
 
