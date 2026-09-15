@@ -45,6 +45,9 @@ on_chroot << EOF
 setupcon --force --save-only -v
 EOF
 
+on_chroot << EOF
+usermod --pass='*' root
+EOF
 
 sed -i 's/^FONTFACE=.*/FONTFACE=""/;s/^FONTSIZE=.*/FONTSIZE=""/' "${ROOTFS_DIR}/etc/default/console-setup"
 sed -i "s/PLACEHOLDER//" "${ROOTFS_DIR}/etc/default/keyboard"

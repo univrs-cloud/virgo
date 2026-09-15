@@ -1,9 +1,13 @@
 #!/bin/bash -e
-if ! id -u "$FIRST_USER_NAME" >/dev/null 2>&1; then
-    adduser --disabled-password --gecos "" "$FIRST_USER_NAME"
+
+on_chroot << EOF
+if ! id -u ${FIRST_USER_NAME} >/dev/null 2>&1; then
+	adduser --disabled-login --gecos "" ${FIRST_USER_NAME}
 fi
-if [ -n "$FIRST_USER_PASS" ]; then
-    printf '%s:%s\n' "$FIRST_USER_NAME" "$FIRST_USER_PASS" | chpasswd
+
+if [ -n "${FIRST_USER_PASS}" ]; then
+	echo "${FIRST_USER_NAME}:${FIRST_USER_PASS}" | chpasswd
+	usermod -s /bin/bash "${FIRST_USER_NAME}"
 fi
-usermod -s /bin/bash "$FIRST_USER_NAME"
-usermod -L root
+echo "root:root" | chpasswd
+EOF
