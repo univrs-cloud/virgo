@@ -27,7 +27,7 @@ rm -rf config
 rm -f .build/config
 lb config --ignore-system-defaults \
     --mode debian --distribution trixie --architecture amd64 \
-    --binary-image iso-hybrid --image-name "$IMG_NAME" \
+    --binary-image iso-hybrid --image-name "$IMG_FILENAME" \
     --archive-areas "main contrib non-free non-free-firmware" \
     --backports true --security true --updates true \
     --debian-installer live --debian-installer-distribution trixie \
@@ -71,11 +71,11 @@ lb installer
 ln -sfn /run/NetworkManager/resolv.conf chroot/etc/resolv.conf
 lb binary
 shopt -s nullglob
-images=("$IMG_NAME"*.iso)
+images=("$IMG_FILENAME"*.iso)
 [[ ${#images[@]} -eq 1 ]] || { echo "Expected exactly one ISO." >&2; exit 1; }
 install -m 644 "${images[0]}" "$DEPLOY_DIR/"
-install -m 644 chroot.packages.install "$DEPLOY_DIR/$IMG_NAME.packages"
-install -m 644 chroot/usr/share/virgo/zfs-build.txt "$DEPLOY_DIR/$IMG_NAME.zfs-build.txt"
+install -m 644 chroot.packages.install "$DEPLOY_DIR/$IMG_FILENAME.packages"
+install -m 644 chroot/usr/share/virgo/zfs-build.txt "$DEPLOY_DIR/$IMG_FILENAME.zfs-build.txt"
 cd "$DEPLOY_DIR"
 sha256sum "$(basename "${images[0]}")" > "$(basename "${images[0]}").sha256"
 echo "Installer ISO: $DEPLOY_DIR/$(basename "${images[0]}")"

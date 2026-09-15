@@ -13,7 +13,9 @@ load_build_config() {
     [[ -z "$extra_config" ]] || source "$extra_config"
     RELEASE=trixie
     ARCH=amd64
-    IMG_NAME=${IMG_NAME:-virgo-trixie}
+    IMG_NAME=${IMG_NAME:-"spica-$RELEASE-$ARCH"}
+    IMG_DATE=${IMG_DATE:-"$(date +%Y-%m-%d)"}
+    IMG_FILENAME=${IMG_FILENAME:-"$IMG_DATE-$IMG_NAME"}
     WORK_DIR=${WORK_DIR:-"$BASE_DIR/work/live-build"}
     DEPLOY_DIR=${DEPLOY_DIR:-"$BASE_DIR/deploy"}
     PUBKEY_SSH_FIRST_USER=${PUBKEY_SSH_FIRST_USER:-}

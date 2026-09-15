@@ -95,10 +95,19 @@ environment variables.
 
 The following environment variables are supported:
 
- * `IMG_NAME` (Default: `virgo-trixie`)
+ * `IMG_NAME` (Default: `spica-$RELEASE-$ARCH`, for example: `spica-trixie-amd64`)
 
    The base name of the ISO to build. The release and architecture are fixed at
    `trixie` and `amd64` by this branch.
+
+ * `IMG_DATE` (Default: today, `YYYY-MM-DD`)
+
+   The build date used in the output filename.
+
+ * `IMG_FILENAME` (Default: `$IMG_DATE-$IMG_NAME`)
+
+   The name given to the ISO and to the checksum, package manifest and ZFS
+   build information written alongside it.
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work/live-build`)
 
