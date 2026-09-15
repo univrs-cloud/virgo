@@ -13,8 +13,8 @@ ZFS module is not signed by a key trusted by the server firmware.
 
 ## Dependencies
 
-Build on an AMD64 machine or VM running Debian 13 with root access, internet
-access, and at least 30 GB of free space on a Linux filesystem.
+Build on an AMD64 machine or VM running Debian 13 or Ubuntu, with root access,
+internet access, and at least 30 GB of free space on a Linux filesystem.
 
 The file `depends` contains a list of tools needed.  The format of this
 package is `<tool>[:<debian-package>]`, where an entry starting with `/` is
@@ -27,6 +27,18 @@ apt install $(cut -d: -f2 depends | sort -u)
 ```
 
 `build.sh` checks them before building and prints anything missing.
+
+On a host that is not Debian 13, `debian-archive-keyring` will not carry the
+Trixie signing keys and debootstrap will refuse to bootstrap the chroot. Import
+them first:
+
+```bash
+wget https://ftp-master.debian.org/keys/archive-key-13.asc
+wget https://ftp-master.debian.org/keys/archive-key-13-security.asc
+mkdir -p /usr/share/keyrings/
+gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-13.asc
+gpg --no-default-keyring --keyring=/usr/share/keyrings/debian-archive-keyring.gpg --import archive-key-13-security.asc
+```
 
 ## Getting started with building your images
 
