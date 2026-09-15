@@ -28,9 +28,25 @@ apt install $(cut -d: -f2 depends | sort -u)
 
 `build.sh` checks them before building and prints anything missing.
 
-On a host that is not Debian 13, `debian-archive-keyring` will not carry the
-Trixie signing keys and debootstrap will refuse to bootstrap the chroot. Import
-them first:
+### Hosts other than Debian 13
+
+Ubuntu packages an older fork of live-build, which rejects options `build.sh`
+passes to `lb config` (`--image-name`, `--updates`, `--bootloaders`,
+`--uefi-secure-boot`). Install the Debian 13 package over it; it is
+`Architecture: all` and depends only on `cpio` and `debootstrap`:
+
+```bash
+wget https://deb.debian.org/debian/pool/main/l/live-build/live-build_20250505+deb13u1_all.deb
+apt install ./live-build_20250505+deb13u1_all.deb
+```
+
+The Debian version carries an epoch, so it sorts above the distribution's own
+package and `apt upgrade` will not replace it. Use the `deb13u1` build rather
+than a newer one from the same pool directory: the newer files are unstable
+uploads, and only this one matches the Trixie the image is built against.
+
+`debian-archive-keyring` will also not carry the Trixie signing keys, and
+debootstrap will refuse to bootstrap the chroot without them. Import them:
 
 ```bash
 wget https://ftp-master.debian.org/keys/archive-key-13.asc
