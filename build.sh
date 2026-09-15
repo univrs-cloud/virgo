@@ -40,7 +40,7 @@ lb config --ignore-system-defaults \
     --chroot-filesystem squashfs --checksums sha256 --source false \
     --iso-volume VIRGO_TRIXIE_AMD64 --iso-publisher "univrs.cloud" \
     --bootappend-live "boot=live components hostname=$TARGET_HOSTNAME locales=$LOCALE_DEFAULT keyboard-layouts=$KEYBOARD_KEYMAP live-config.nocomponents=user-setup,sudo,ssh,ifupdown" \
-    --bootappend-install "priority=high preseed/file=/cdrom/install/preseed.cfg"
+    --bootappend-install "priority=high"
 mkdir -p config/virgo/scripts config/hooks/live config/package-lists \
     config/includes.installer config/includes.chroot/etc
 cp -R "$BASE_DIR/stage0" "$BASE_DIR/stage1" "$BASE_DIR/stage2" config/virgo/
