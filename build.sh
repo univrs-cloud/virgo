@@ -80,9 +80,10 @@ lb binary
 shopt -s nullglob
 images=("$IMG_FILENAME"*.iso)
 [[ ${#images[@]} -eq 1 ]] || { echo "Expected exactly one ISO." >&2; exit 1; }
-install -m 644 "${images[0]}" "$DEPLOY_DIR/"
-install -m 644 chroot.packages.install "$DEPLOY_DIR/$IMG_FILENAME.packages"
-install -m 644 chroot/usr/share/virgo/zfs-build.txt "$DEPLOY_DIR/$IMG_FILENAME.zfs-build.txt"
+deployed="$ARCHIVE_FILENAME$IMG_SUFFIX"
+install -m 644 "${images[0]}" "$DEPLOY_DIR/$deployed.iso"
+install -m 644 chroot.packages.install "$DEPLOY_DIR/$deployed.packages"
+install -m 644 chroot/usr/share/virgo/zfs-build.txt "$DEPLOY_DIR/$deployed.zfs-build.txt"
 cd "$DEPLOY_DIR"
-sha256sum "$(basename "${images[0]}")" > "$(basename "${images[0]}").sha256"
-echo "Installer ISO: $DEPLOY_DIR/$(basename "${images[0]}")"
+sha256sum "$deployed.iso" > "$deployed.iso.sha256"
+echo "Installer ISO: $DEPLOY_DIR/$deployed.iso"

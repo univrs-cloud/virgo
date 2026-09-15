@@ -106,8 +106,17 @@ The following environment variables are supported:
 
  * `IMG_FILENAME` (Default: `$IMG_DATE-$IMG_NAME`)
 
-   The name given to the ISO and to the checksum, package manifest and ZFS
-   build information written alongside it.
+   The name live-build builds under, inside `WORK_DIR`.
+
+ * `IMG_SUFFIX` (Default: `-lite`)
+
+   Suffix appended to the deployed filenames.
+
+ * `ARCHIVE_FILENAME` (Default: `image_$IMG_DATE-$IMG_NAME`)
+
+   With `IMG_SUFFIX`, the name given to the ISO in `DEPLOY_DIR` and to the
+   checksum, package manifest and ZFS build information written alongside it,
+   for example `image_2026-09-15-spica-trixie-amd64-lite.iso`.
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work/live-build`)
 

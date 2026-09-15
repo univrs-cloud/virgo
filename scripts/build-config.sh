@@ -16,6 +16,8 @@ load_build_config() {
     IMG_NAME=${IMG_NAME:-"spica-$RELEASE-$ARCH"}
     IMG_DATE=${IMG_DATE:-"$(date +%Y-%m-%d)"}
     IMG_FILENAME=${IMG_FILENAME:-"$IMG_DATE-$IMG_NAME"}
+    IMG_SUFFIX=${IMG_SUFFIX:--lite}
+    ARCHIVE_FILENAME=${ARCHIVE_FILENAME:-"image_$IMG_DATE-$IMG_NAME"}
     WORK_DIR=${WORK_DIR:-"$BASE_DIR/work/live-build"}
     DEPLOY_DIR=${DEPLOY_DIR:-"$BASE_DIR/deploy"}
     PUBKEY_SSH_FIRST_USER=${PUBKEY_SSH_FIRST_USER:-}

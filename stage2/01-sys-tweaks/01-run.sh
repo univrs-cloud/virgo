@@ -7,10 +7,12 @@ if [ -n "${PUBKEY_SSH_FIRST_USER}" ]; then
 	chmod 0600 "${ROOTFS_DIR}"/home/"${FIRST_USER_NAME}"/.ssh/authorized_keys
 fi
 
+install -v -d "${ROOTFS_DIR}/etc/ssh/sshd_config.d"
+printf 'PermitRootLogin no\n' > "${ROOTFS_DIR}/etc/ssh/sshd_config.d/10-virgo.conf"
+
 if [ "${PUBKEY_ONLY_SSH}" = "1" ]; then
-	install -v -d "${ROOTFS_DIR}/etc/ssh/sshd_config.d"
 	printf 'PubkeyAuthentication yes\nPasswordAuthentication no\nKbdInteractiveAuthentication no\n' \
-		> "${ROOTFS_DIR}/etc/ssh/sshd_config.d/10-virgo.conf"
+		>> "${ROOTFS_DIR}/etc/ssh/sshd_config.d/10-virgo.conf"
 fi
 
 install -v -m 644 -D files/ssh-regenerate-host-keys.conf "${ROOTFS_DIR}/etc/systemd/system/ssh.service.d/10-host-keys.conf"
