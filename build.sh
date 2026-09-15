@@ -48,7 +48,14 @@ cp "$BASE_DIR/scripts/"{common,run-stages.sh} config/virgo/scripts/
 write_build_environment > config/virgo/build.env
 chmod 600 config/virgo/build.env
 cp "$BASE_DIR/live-build/installer.preseed" config/includes.installer/preseed.cfg
-printf 'd-i time/zone string %s\n' "$TIMEZONE_DEFAULT" >> config/includes.installer/preseed.cfg
+{
+    printf 'd-i time/zone string %s\n' "$TIMEZONE_DEFAULT"
+    printf 'd-i debian-installer/locale string %s\n' "$LOCALE_DEFAULT"
+    printf 'd-i keyboard-configuration/xkb-keymap select %s\n' "$KEYBOARD_KEYMAP"
+    printf 'd-i keyboard-configuration/variant select %s\n' "$KEYBOARD_LAYOUT"
+    printf 'd-i netcfg/get_hostname string %s\n' "$TARGET_HOSTNAME"
+    printf 'd-i netcfg/get_domain string\n'
+} >> config/includes.installer/preseed.cfg
 printf '%s\n' "$TARGET_HOSTNAME" > config/includes.chroot/etc/hostname
 printf '127.0.0.1 localhost\n127.0.1.1 %s\n::1 localhost ip6-localhost ip6-loopback\n' \
     "$TARGET_HOSTNAME" > config/includes.chroot/etc/hosts

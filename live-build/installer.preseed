@@ -7,5 +7,6 @@ d-i pkgsel/run_tasksel boolean false
 d-i pkgsel/include string
 popularity-contest popularity-contest/participate boolean false
 d-i passwd/make-user boolean false
-d-i passwd/root-login boolean false
+d-i passwd/root-login boolean true
+d-i passwd/root-password-crypted password !
 d-i preseed/late_command string in-target /usr/share/virgo/finish-install.sh
