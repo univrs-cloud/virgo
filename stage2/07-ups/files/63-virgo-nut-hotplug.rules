@@ -1,5 +1,5 @@
-ACTION=="remove", GOTO="univrs_nut_end"
-SUBSYSTEM!="usb", GOTO="univrs_nut_end"
+ACTION=="remove", GOTO="virgo_nut_end"
+SUBSYSTEM!="usb", GOTO="virgo_nut_end"
 ATTR{idVendor}=="0001", ATTR{idProduct}=="0000", TAG+="systemd", ENV{SYSTEMD_WANTS}+="nut-driver@ups.service"
 ATTR{idVendor}=="03f0", ATTR{idProduct}=="0001", TAG+="systemd", ENV{SYSTEMD_WANTS}+="nut-driver@ups.service"
 ATTR{idVendor}=="03f0", ATTR{idProduct}=="1f01", TAG+="systemd", ENV{SYSTEMD_WANTS}+="nut-driver@ups.service"
@@ -131,4 +131,4 @@ ATTR{idVendor}=="3746", ATTR{idProduct}=="ffff", TAG+="systemd", ENV{SYSTEMD_WAN
 ATTR{idVendor}=="4234", ATTR{idProduct}=="0001", TAG+="systemd", ENV{SYSTEMD_WANTS}+="nut-driver@ups.service"
 ATTR{idVendor}=="4234", ATTR{idProduct}=="0002", TAG+="systemd", ENV{SYSTEMD_WANTS}+="nut-driver@ups.service"
 ATTR{idVendor}=="ffff", ATTR{idProduct}=="0000", TAG+="systemd", ENV{SYSTEMD_WANTS}+="nut-driver@ups.service"
-LABEL="univrs_nut_end"
+LABEL="virgo_nut_end"

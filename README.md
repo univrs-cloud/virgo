@@ -1,5 +1,3 @@
-# virgo
-
 Tool used to create virgoOS installer images.
 
 Builds a Debian 13 Trixie hybrid ISO using live-build. Write the ISO to a USB
@@ -20,7 +18,7 @@ The file `depends` contains a list of tools needed.  The format of this
 package is `<tool>[:<debian-package>]`, where an entry starting with `/` is
 checked as a file path rather than a command.
 
-To install the required dependencies for `virgo` you should run:
+To install the required dependencies for `virgoOS` you should run:
 
 ```bash
 apt install $(cut -d: -f2 depends | sort -u)
@@ -69,8 +67,7 @@ git clone --branch amd64 https://github.com/univrs-cloud/virgo.git
 the latest revision of the repository. Do not do this on your development machine.
 
 Also, be careful to clone the repository to a base path **NOT** containing spaces.
-This configuration is not supported by debootstrap and will lead to `virgo` not
-running.
+This configuration is not supported by debootstrap and will lead to `virgoOS` not running.
 
 After cloning the repository, you can move to the next step and start configuring
 your build.
@@ -120,9 +117,7 @@ The following environment variables are supported:
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work/live-build`)
 
-   Directory in which `virgo` builds the target system.  This value can be
-   changed if you have a suitably large, fast storage location. Must be an
-   absolute path.
+   Directory in which `virgoOS` builds the target system. This value can be changed if you have a suitably large, fast storage location. Must be an absolute path.
 
    **CAUTION**: If your working directory is on an NTFS partition you probably won't be able to build: make sure this is a proper Linux filesystem.
 
@@ -135,7 +130,7 @@ The following environment variables are supported:
 
    Default system locale.
 
- * `TARGET_HOSTNAME` (Default: 'm87' )
+ * `TARGET_HOSTNAME` (Default: 'univrs' )
 
    Setting the hostname to the specified value.
 
@@ -272,7 +267,7 @@ maintenance and allows for more easy customization.
 
  - **Stage 2** - the full system.  Stage 2 sets timezone and charmap
    defaults, configures NetworkManager, the firewall and mDNS, installs ZFS,
-   Samba, Docker, Node.js and the Virgo packages, and creates necessary groups
+   Samba, Docker, Node.js and the virgoOS packages, and creates necessary groups
    and gives the user access to sudo and the standard console hardware
    permission groups.
 
