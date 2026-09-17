@@ -1,5 +1,5 @@
 [Unit]
-Description=Virgo virtual IP
+Description=virgoOS virtual IP
 After=network-online.target
 Wants=network-online.target
 
