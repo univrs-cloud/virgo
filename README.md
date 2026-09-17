@@ -58,13 +58,13 @@ environment variables.
 
 The following environment variables are supported:
 
- * `IMG_NAME` (Default: `univrs-$RELEASE-$ARCH`, for example: `univrs-trixie-arm64`)
+ * `IMG_NAME` (Default: `virgo-$RELEASE-$ARCH`, for example: `virgo-trixie-arm64`)
 
    The name of the image to build with the current stage directories. Use this
    variable to set the root name of your OS, eg `IMG_NAME=Frobulator`.
    Export files in stages may add suffixes to `IMG_NAME`.
 
- * `PI_GEN_RELEASE` (Default: `univrs`)
+ * `PI_GEN_RELEASE` (Default: `virgo`)
 
    The release name to use in `/etc/issue.txt`.
 
@@ -236,7 +236,7 @@ The following environment variables are supported:
 A simple example for building virgoOS:
 
 ```bash
-IMG_NAME='univrs'
+IMG_NAME='virgo'
 ```
 
 The config file can also be specified on the command line as an argument the `build.sh` or `build-docker.sh` scripts.
@@ -307,7 +307,7 @@ vi config         # Edit your config file. See above.
 ```
 
 If everything goes well, your finished image will be in the `deploy/` folder.
-You can then remove the build container with `docker rm -v univrs_work`
+You can then remove the build container with `docker rm -v virgo_work`
 
 If you encounter errors during the build, you can edit the corresponding scripts, and
 continue:
@@ -319,7 +319,7 @@ CONTINUE=1 ./build-docker.sh
 To examine the container after a failure you can enter a shell within it using:
 
 ```bash
-sudo docker run -it --privileged --volumes-from=univrs_work univrs /bin/bash
+sudo docker run -it --privileged --volumes-from=virgo_work virgo /bin/bash
 ```
 
 After successful build, the build container is by default removed. This may be undesired when making incremental changes to a customized build. To prevent the build script from remove the container add
@@ -334,7 +334,7 @@ arm64 does not work inside the container, the container registers the image's
 
 ### Passing arguments to Docker
 
-When the docker image is run various required command line arguments are provided.  For example the system mounts the `/dev` directory to the `/dev` directory within the docker container.  If other arguments are required they may be specified in the UNIVRS_DOCKER_OPTS environment variable.  For example setting `UNIVRS_DOCKER_OPTS="--add-host foo:192.168.0.23"` will add '192.168.0.23   foo' to the `/etc/hosts` file in the container.  The `--name`
+When the docker image is run various required command line arguments are provided.  For example the system mounts the `/dev` directory to the `/dev` directory within the docker container.  If other arguments are required they may be specified in the VIRGO_DOCKER_OPTS environment variable.  For example setting `VIRGO_DOCKER_OPTS="--add-host foo:192.168.0.23"` will add '192.168.0.23   foo' to the `/etc/hosts` file in the container.  The `--name`
 and `--privileged` options are already set by the script and should not be redefined.
 
 ## Stage Anatomy
@@ -381,7 +381,7 @@ to `./stage2` (if building a minimal system).
 
 ```bash
 # Example for building a lite system
-echo "IMG_NAME='univrs'" > config
+echo "IMG_NAME='virgo'" > config
 touch ./stage3/SKIP ./stage4/SKIP ./stage5/SKIP
 touch ./stage4/SKIP_IMAGES ./stage5/SKIP_IMAGES
 sudo ./build.sh  # or ./build-docker.sh
@@ -432,7 +432,7 @@ You may see one of the following errors:
 arm64: not supported on this machine/kernel
 ```
 ```
-W: Failure trying to run: chroot "/univrs/work/test/stage0/rootfs" /bin/true
+W: Failure trying to run: chroot "/virgo/work/test/stage0/rootfs" /bin/true
 and/or
 chroot: failed to run command '/bin/true': Exec format error
 ```

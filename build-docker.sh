@@ -52,10 +52,10 @@ else
 	source ${CONFIG_FILE}
 fi
 
-CONTAINER_NAME=${CONTAINER_NAME:-univrs_work}
+CONTAINER_NAME=${CONTAINER_NAME:-virgo_work}
 CONTINUE=${CONTINUE:-0}
 PRESERVE_CONTAINER=${PRESERVE_CONTAINER:-0}
-UNIVRS_DOCKER_OPTS=${UNIVRS_DOCKER_OPTS:-""}
+VIRGO_DOCKER_OPTS=${VIRGO_DOCKER_OPTS:-""}
 
 if [ -z "${IMG_NAME}" ]; then
 	echo "IMG_NAME not set in 'config'" 1>&2
@@ -82,7 +82,7 @@ fi
 # Modify original build-options to allow config file to be mounted in the docker container
 BUILD_OPTS="$(echo "${BUILD_OPTS:-}" | sed -E 's@\-c\s?([^ ]+)@-c /config@')"
 
-${DOCKER} build --build-arg BASE_IMAGE=docker.io/debian:trixie -t univrs "${DIR}"
+${DOCKER} build --build-arg BASE_IMAGE=docker.io/debian:trixie -t virgo "${DIR}"
 
 if [ "${CONTAINER_EXISTS}" != "" ]; then
   DOCKER_CMDLINE_NAME="${CONTAINER_NAME}_cont"
@@ -99,11 +99,11 @@ time ${DOCKER} run \
   $DOCKER_CMDLINE_PRE \
   --name "${DOCKER_CMDLINE_NAME}" \
   --privileged \
-  ${UNIVRS_DOCKER_OPTS} \
+  ${VIRGO_DOCKER_OPTS} \
   --volume "${CONFIG_FILE}":/config:ro \
   -e "GIT_HASH=${GIT_HASH}" \
   $DOCKER_CMDLINE_POST \
-  univrs \
+  virgo \
   bash -e -o pipefail -c "
     mount -t binfmt_misc binfmt_misc /proc/sys/fs/binfmt_misc || true
     # Use the host's arm64 registration if it works in here; otherwise register
@@ -117,7 +117,7 @@ time ${DOCKER} run \
       echo ':qemu-aarch64-rpi:M::\x7fELF\x02\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\xb7\x00:\xff\xff\xff\xff\xff\xff\xff\x00\xff\xff\xff\xff\xff\xff\xff\xff\xfe\xff\xff\xff:/usr/bin/qemu-aarch64:F' > /proc/sys/fs/binfmt_misc/register
       trap 'echo -1 > /proc/sys/fs/binfmt_misc/qemu-aarch64-rpi' EXIT
     fi
-    cd /univrs
+    cd /virgo
     ./build.sh ${BUILD_OPTS}
     rsync -av work/*/build.log deploy/
   " &
@@ -125,7 +125,7 @@ time ${DOCKER} run \
 
 # Ensure that deploy/ is always owned by calling user
 echo "copying results from deploy/"
-${DOCKER} cp "${CONTAINER_NAME}":/univrs/deploy - | tar -xf -
+${DOCKER} cp "${CONTAINER_NAME}":/virgo/deploy - | tar -xf -
 
 echo "copying log from container ${CONTAINER_NAME} to deploy/"
 ${DOCKER} logs --timestamps "${CONTAINER_NAME}" &>deploy/build-docker.log

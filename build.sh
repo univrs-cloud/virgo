@@ -147,9 +147,9 @@ fi
 BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ $BASE_DIR = *" "* ]]; then
-	echo "There is a space in the base path of univrs"
+	echo "There is a space in the base path of virgo"
 	echo "This is not a valid setup supported by debootstrap."
-	echo "Please remove the spaces, or move univrs directory to a base path without spaces" 1>&2
+	echo "Please remove the spaces, or move virgo directory to a base path without spaces" 1>&2
 	exit 1
 fi
 
@@ -173,13 +173,13 @@ do
 	esac
 done
 
-export PI_GEN=${PI_GEN:-univrs}
+export PI_GEN=${PI_GEN:-virgo}
 export PI_GEN_REPO=${PI_GEN_REPO:-https://univrs.cloud}
-export PI_GEN_RELEASE=${PI_GEN_RELEASE:-univrs}
+export PI_GEN_RELEASE=${PI_GEN_RELEASE:-virgo}
 
 export ARCH=arm64
 export RELEASE=${RELEASE:-trixie} # Don't forget to update stage0/prerun.sh
-export IMG_NAME="${IMG_NAME:-univrs-$RELEASE-$ARCH}"
+export IMG_NAME="${IMG_NAME:-virgo-$RELEASE-$ARCH}"
 
 export USE_QEMU="${USE_QEMU:-0}"
 export IMG_DATE="${IMG_DATE:-"$(date +%Y-%m-%d)"}"

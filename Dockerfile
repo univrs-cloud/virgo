@@ -11,6 +11,6 @@ RUN apt-get -y update && \
         ca-certificates fdisk gpg pigz arch-test \
     && rm -rf /var/lib/apt/lists/*
 
-COPY . /univrs/
+COPY . /virgo/
 
-VOLUME [ "/univrs/work", "/univrs/deploy"]
+VOLUME [ "/virgo/work", "/virgo/deploy"]
