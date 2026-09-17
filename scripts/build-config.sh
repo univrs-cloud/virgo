@@ -13,7 +13,7 @@ load_build_config() {
     [[ -z "$extra_config" ]] || source "$extra_config"
     RELEASE=trixie
     ARCH=amd64
-    IMG_NAME=${IMG_NAME:-"spica-$RELEASE-$ARCH"}
+    IMG_NAME=${IMG_NAME:-"virgo-$RELEASE-$ARCH"}
     IMG_DATE=${IMG_DATE:-"$(date +%Y-%m-%d)"}
     IMG_FILENAME=${IMG_FILENAME:-"$IMG_DATE-$IMG_NAME"}
     IMG_SUFFIX=${IMG_SUFFIX:--lite}

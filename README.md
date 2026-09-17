@@ -92,7 +92,7 @@ environment variables.
 
 The following environment variables are supported:
 
- * `IMG_NAME` (Default: `spica-$RELEASE-$ARCH`, for example: `spica-trixie-amd64`)
+ * `IMG_NAME` (Default: `virgo-$RELEASE-$ARCH`, for example: `virgo-trixie-amd64`)
 
    The base name of the ISO to build. The release and architecture are fixed at
    `trixie` and `amd64` by this branch.
@@ -113,7 +113,7 @@ The following environment variables are supported:
 
    With `IMG_SUFFIX`, the name given to the ISO in `DEPLOY_DIR` and to the
    checksum, package manifest and ZFS build information written alongside it,
-   for example `image_2026-09-15-spica-trixie-amd64-lite.iso`.
+   for example `image_2026-09-05-virgo-trixie-amd64-lite.iso`.
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work/live-build`)
 
@@ -194,7 +194,7 @@ The following environment variables are supported:
 A simple example for building virgoOS:
 
 ```bash
-IMG_NAME='Spica'
+IMG_NAME='virgo'
 ```
 
 The config file can also be specified on the command line as an argument the `build.sh` script.
