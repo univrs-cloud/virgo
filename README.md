@@ -1,5 +1,3 @@
-# virgo
-
 Tool used to create virgoOS images.
 
 ## Dependencies
@@ -10,7 +8,7 @@ always advise you use the latest OS for security reasons.
 On other Linux distributions it may be possible to use the Docker build described
 below.
 
-To install the required dependencies for `virgo` you should run:
+To install the required dependencies for `virgoOS` you should run:
 
 ```bash
 apt install coreutils quilt parted qemu-user-binfmt debootstrap zerofree zip \
@@ -47,8 +45,7 @@ git clone https://github.com/univrs-cloud/virgo.git
 the latest revision of the repository. Do not do this on your development machine.
 
 Also, be careful to clone the repository to a base path **NOT** containing spaces.
-This configuration is not supported by debootstrap and will lead to `virgo` not
-running.
+This configuration is not supported by debootstrap and will lead to `virgoOS` not running.
 
 After cloning the repository, you can move to the next step and start configuring
 your build.
@@ -61,13 +58,13 @@ environment variables.
 
 The following environment variables are supported:
 
- * `IMG_NAME` (Default: `spica-$RELEASE-$ARCH`, for example: `spica-trixie-armhf`)
+ * `IMG_NAME` (Default: `univrs-$RELEASE-$ARCH`, for example: `univrs-trixie-arm64`)
 
    The name of the image to build with the current stage directories. Use this
    variable to set the root name of your OS, eg `IMG_NAME=Frobulator`.
    Export files in stages may add suffixes to `IMG_NAME`.
 
- * `PI_GEN_RELEASE` (Default: `virgoOS Spica`)
+ * `PI_GEN_RELEASE` (Default: `univrs`)
 
    The release name to use in `/etc/issue.txt`.
 
@@ -96,12 +93,12 @@ The following environment variables are supported:
 
    **CAUTION**: Currently, changing this value will probably break build.sh
 
-   Top-level directory for `virgo`.  Contains stage directories, build
+   Top-level directory for `virgoOS`.  Contains stage directories, build
    scripts, and by default both work and deployment directories.
 
  * `WORK_DIR`  (Default: `$BASE_DIR/work`)
 
-   Directory in which `virgo` builds the target system.  This value can be
+   Directory in which `virgoOS` builds the target system.  This value can be
    changed if you have a suitably large, fast storage location for stages to
    be built and cached.  Note, `WORK_DIR` stores a complete copy of the target
    system for each build stage, amounting to tens of gigabytes in the case of
@@ -145,7 +142,7 @@ The following environment variables are supported:
 
    Default system locale.
 
- * `TARGET_HOSTNAME` (Default: 'm87' )
+ * `TARGET_HOSTNAME` (Default: 'univrs' )
 
    Setting the hostname to the specified value.
 
@@ -239,7 +236,7 @@ The following environment variables are supported:
 A simple example for building virgoOS:
 
 ```bash
-IMG_NAME='Spica'
+IMG_NAME='univrs'
 ```
 
 The config file can also be specified on the command line as an argument the `build.sh` or `build-docker.sh` scripts.
@@ -310,7 +307,7 @@ vi config         # Edit your config file. See above.
 ```
 
 If everything goes well, your finished image will be in the `deploy/` folder.
-You can then remove the build container with `docker rm -v virgo_work`
+You can then remove the build container with `docker rm -v univrs_work`
 
 If you encounter errors during the build, you can edit the corresponding scripts, and
 continue:
@@ -322,7 +319,7 @@ CONTINUE=1 ./build-docker.sh
 To examine the container after a failure you can enter a shell within it using:
 
 ```bash
-sudo docker run -it --privileged --volumes-from=virgo_work virgo /bin/bash
+sudo docker run -it --privileged --volumes-from=univrs_work univrs /bin/bash
 ```
 
 After successful build, the build container is by default removed. This may be undesired when making incremental changes to a customized build. To prevent the build script from remove the container add
@@ -331,16 +328,13 @@ After successful build, the build container is by default removed. This may be u
 PRESERVE_CONTAINER=1 ./build-docker.sh
 ```
 
-There is a possibility that even when running from a docker container, the
-installation of `qemu-user-static` will silently fail when building the image
-because `binfmt-support` _must be enabled on the underlying kernel_. An easy
-fix is to ensure `binfmt-support` is installed on the host machine before
-starting the `./build-docker.sh` script (or using your own docker build
-solution).
+No qemu is needed on the host. If the host's own `binfmt_misc` registration for
+arm64 does not work inside the container, the container registers the image's
+`qemu-aarch64` for the duration of the build.
 
 ### Passing arguments to Docker
 
-When the docker image is run various required command line arguments are provided.  For example the system mounts the `/dev` directory to the `/dev` directory within the docker container.  If other arguments are required they may be specified in the VIRGO_DOCKER_OPTS environment variable.  For example setting `VIRGO_DOCKER_OPTS="--add-host foo:192.168.0.23"` will add '192.168.0.23   foo' to the `/etc/hosts` file in the container.  The `--name`
+When the docker image is run various required command line arguments are provided.  For example the system mounts the `/dev` directory to the `/dev` directory within the docker container.  If other arguments are required they may be specified in the UNIVRS_DOCKER_OPTS environment variable.  For example setting `UNIVRS_DOCKER_OPTS="--add-host foo:192.168.0.23"` will add '192.168.0.23   foo' to the `/etc/hosts` file in the container.  The `--name`
 and `--privileged` options are already set by the script and should not be redefined.
 
 ## Stage Anatomy
@@ -387,7 +381,7 @@ to `./stage2` (if building a minimal system).
 
 ```bash
 # Example for building a lite system
-echo "IMG_NAME='spica'" > config
+echo "IMG_NAME='univrs'" > config
 touch ./stage3/SKIP ./stage4/SKIP ./stage5/SKIP
 touch ./stage4/SKIP_IMAGES ./stage5/SKIP_IMAGES
 sudo ./build.sh  # or ./build-docker.sh
@@ -428,28 +422,23 @@ git clone --branch arm64 https://github.com/univrs-cloud/virgo.git
 ## `binfmt_misc`
 
 Linux is able to execute binaries from other architectures, meaning that it should be
-possible to make use of `virgo` on an x86_64 system, even though it will be running
+possible to make use of `virgoOS` on an x86_64 system, even though it will be running
 ARM binaries. This requires support from the [`binfmt_misc`](https://en.wikipedia.org/wiki/Binfmt_misc)
 kernel module.
 
 You may see one of the following errors:
 
 ```
-update-binfmts: warning: Couldn't load the binfmt_misc module.
+arm64: not supported on this machine/kernel
 ```
 ```
-W: Failure trying to run: chroot "/virgo/work/test/stage0/rootfs" /bin/true
+W: Failure trying to run: chroot "/univrs/work/test/stage0/rootfs" /bin/true
 and/or
 chroot: failed to run command '/bin/true': Exec format error
 ```
 
-To resolve this, ensure that the following files are available (install them if necessary):
-
-```
-/lib/modules/$(uname -r)/kernel/fs/binfmt_misc.ko
-/usr/bin/qemu-aarch64-static
-```
-
-You may also need to load the module by hand - run `modprobe binfmt_misc`.
-
-If you are using WSL to build you may have to enable the service `sudo update-binfmts --enable`
+To resolve this, ensure that the module is available and loaded (`modprobe binfmt_misc`).
+For builds outside Docker, `qemu-user-binfmt` must also be installed and its interpreters
+registered (`ls /proc/sys/fs/binfmt_misc` should list `qemu-aarch64`); on distributions whose
+`qemu-user` binaries are still dynamically linked, install `qemu-user-static` instead.
+Docker builds need nothing else on the host.
