@@ -10,7 +10,7 @@ RemainAfterExit=yes
 TimeoutStartSec=180
 EnvironmentFile=/etc/default/virgo-virtual-ip
 ExecStartPre=/usr/local/bin/virgo-virtual-ip-guard
-ExecStart=/usr/sbin/ip addr replace ${VIRTUAL_IP_CIDR} dev ${VIRTUAL_IP_DEV}
+ExecStart=/usr/sbin/ip addr replace ${VIRTUAL_IP_CIDR} dev ${VIRTUAL_IP_DEV} preferred_lft 0
 ExecStartPost=-/usr/bin/arping -U -q -c 3 -I ${VIRTUAL_IP_DEV} ${VIRTUAL_IP_ADDR}
 ExecStop=-/usr/sbin/ip addr del ${VIRTUAL_IP_CIDR} dev ${VIRTUAL_IP_DEV}
 
