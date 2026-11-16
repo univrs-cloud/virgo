@@ -1,4 +1,4 @@
 udisks2
 zfs-dkms zfsutils-linux
-sanoid
+sanoid mbuffer pv
 samba
