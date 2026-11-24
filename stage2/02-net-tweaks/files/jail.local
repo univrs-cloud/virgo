@@ -1,3 +1,10 @@
 [sshd]
 enabled = true
 backend = systemd
+
+[virgo-pairing]
+enabled = true
+backend = polling
+filter =
+port = 3000
+bantime = -1
